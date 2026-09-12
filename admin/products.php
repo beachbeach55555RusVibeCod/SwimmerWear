@@ -1,5 +1,6 @@
 <?php
 require 'inc.php';
+require dirname(__DIR__) . '/inc/blocks.php';
 need_auth();
 $msg = '';
 
@@ -30,6 +31,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    ON DUPLICATE KEY UPDATE stock=VALUES(stock)")
         ->execute([(int)$_POST['pid'], trim($_POST['color']), trim($_POST['size']), (int)$_POST['stock']]);
     $msg = 'Вариант добавлен';
+  }
+  if ($a === 'ph_add') {
+    $pid = (int)$_POST['pid'];
+    $max = (int)db()->query("SELECT COALESCE(MAX(sort),-1) FROM product_media WHERE product_id=$pid")->fetchColumn();
+    foreach ((array)($_POST['media'] ?? []) as $mid) {
+      if (!$mid) continue;
+      db()->prepare("INSERT INTO product_media (product_id,media_id,color,sort) VALUES (?,?,?,?)")
+          ->execute([$pid, (int)$mid, trim($_POST['color'] ?? ''), ++$max]);
+    }
+    $msg = 'Фотографии привязаны';
+  }
+  if ($a === 'ph_del') { db()->prepare("DELETE FROM product_media WHERE id=?")->execute([(int)$_POST['id']]); $msg = 'Фото отвязано'; }
+  if ($a === 'ph_color') {
+    db()->prepare("UPDATE product_media SET color=? WHERE id=?")->execute([trim($_POST['color']), (int)$_POST['id']]);
+    $msg = 'Цвет фото изменён';
+  }
+  if ($a === 'ph_move') {
+    $id = (int)$_POST['id'];
+    $st = db()->prepare("SELECT * FROM product_media WHERE id=?"); $st->execute([$id]); $cur = $st->fetch();
+    if ($cur) {
+      $up = $_POST['dir'] === 'up';
+      $st = db()->prepare("SELECT * FROM product_media WHERE product_id=? AND sort " . ($up ? '<' : '>') . " ? ORDER BY sort " . ($up ? 'DESC' : 'ASC') . " LIMIT 1");
+      $st->execute([$cur['product_id'], $cur['sort']]);
+      if ($nb = $st->fetch()) {
+        db()->prepare("UPDATE product_media SET sort=? WHERE id=?")->execute([$nb['sort'], $cur['id']]);
+        db()->prepare("UPDATE product_media SET sort=? WHERE id=?")->execute([$cur['sort'], $nb['id']]);
+      }
+    }
   }
   if ($a === 'var_del') { db()->prepare("DELETE FROM variants WHERE id=?")->execute([(int)$_POST['id']]); }
 }
@@ -86,10 +115,79 @@ head('Товары'); ?>
   </table>
   <form method="post" class="row" style="margin-top:14px">
     <input type="hidden" name="a" value="var_add"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>">
-    <div style="flex:1"><label>Цвет</label><input name="color" placeholder="хаки" required></div>
+    <div style="flex:1"><label>Цвет</label><input name="color" placeholder="хаки" required list="colorlist"></div>
     <div style="flex:1"><label>Размер</label><input name="size" placeholder="M" required></div>
     <div style="width:110px"><label>Остаток</label><input name="stock" type="number" value="0"></div>
     <button class="btn" style="align-self:end">Добавить</button>
+  </form>
+</div>
+
+<?php
+$st = db()->prepare("SELECT pm.*, m.file, m.alt FROM product_media pm JOIN media m ON m.id=pm.media_id
+                     WHERE pm.product_id=? ORDER BY pm.sort, pm.id");
+$st->execute([$edit['id']]);
+$photos = $st->fetchAll();
+$free = db()->query("SELECT * FROM media ORDER BY id DESC")->fetchAll();
+$colorNames = [];
+foreach ($vars as $v) $colorNames[$v['color']] = 1;
+?>
+<datalist id="colorlist"><?php foreach (array_keys($colorNames) as $c): ?><option value="<?= h($c) ?>"><?php endforeach; ?></datalist>
+
+<div class="panel">
+  <b>Фотографии товара</b>
+  <p class="tag" style="margin:8px 0 14px">Фото с указанным цветом показываются только при выборе этого цвета. Без цвета — показываются всегда. Порядок задаёт, какое фото будет первым на карточке.</p>
+
+  <div class="thumbs">
+    <?php foreach ($photos as $ph): ?>
+      <div class="thumb">
+        <img src="<?= h(media_url($ph['file'])) ?>" alt="" loading="lazy">
+        <div class="n">
+          <form method="post" style="margin-bottom:4px">
+            <input type="hidden" name="a" value="ph_color"><input type="hidden" name="id" value="<?= (int)$ph['id'] ?>">
+            <select name="color" onchange="this.form.submit()" style="font-size:11px;padding:3px">
+              <option value="">— все цвета —</option>
+              <?php foreach (array_keys($colorNames) as $c): ?>
+                <option value="<?= h($c) ?>" <?= $ph['color'] === $c ? 'selected' : '' ?>><?= h($c) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </form>
+          <div class="row" style="gap:4px">
+            <form method="post"><input type="hidden" name="a" value="ph_move"><input type="hidden" name="dir" value="up">
+              <input type="hidden" name="id" value="<?= (int)$ph['id'] ?>"><button class="btn sm grey">&larr;</button></form>
+            <form method="post"><input type="hidden" name="a" value="ph_move"><input type="hidden" name="dir" value="down">
+              <input type="hidden" name="id" value="<?= (int)$ph['id'] ?>"><button class="btn sm grey">&rarr;</button></form>
+            <form method="post"><input type="hidden" name="a" value="ph_del">
+              <input type="hidden" name="id" value="<?= (int)$ph['id'] ?>"><button class="btn sm red">×</button></form>
+          </div>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+  <?php if (!$photos): ?><p class="tag">К товару пока не привязано ни одного фото</p><?php endif; ?>
+
+  <form method="post" style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px">
+    <input type="hidden" name="a" value="ph_add"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>">
+    <div class="row">
+      <div style="flex:1"><label>Цвет для добавляемых фото</label>
+        <select name="color">
+          <option value="">— все цвета —</option>
+          <?php foreach (array_keys($colorNames) as $c): ?><option value="<?= h($c) ?>"><?= h($c) ?></option><?php endforeach; ?>
+        </select></div>
+      <button class="btn" style="align-self:end">Привязать отмеченные</button>
+    </div>
+    <label style="margin-top:14px">Выберите фото из медиатеки</label>
+    <div class="thumbs">
+      <?php foreach ($free as $m): if (preg_match('~\.(mp4|webm)$~i', $m['file'])) continue; ?>
+        <label class="thumb" style="cursor:pointer;display:block">
+          <img src="<?= h(media_url($m['file'])) ?>" alt="" loading="lazy">
+          <div class="n" style="display:flex;gap:6px;align-items:center">
+            <input type="checkbox" name="media[]" value="<?= (int)$m['id'] ?>" style="width:auto">
+            <span><?= h($m['alt'] ?: $m['file']) ?></span>
+          </div>
+        </label>
+      <?php endforeach; ?>
+    </div>
+    <?php if (!$free): ?><p class="tag">Медиатека пуста — загрузите файлы в разделе «Медиа»</p><?php endif; ?>
   </form>
 </div>
 <?php endif; ?>

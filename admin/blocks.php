@@ -113,17 +113,23 @@ if (!$pageId && $pages) $pageId = (int)$pages[0]['id'];
 $st = db()->prepare("SELECT * FROM blocks WHERE page_id=? ORDER BY sort");
 $st->execute([$pageId]);
 $blocks = $st->fetchAll();
+$mediaList = db()->query("SELECT file, alt FROM media ORDER BY id DESC")->fetchAll();
 
 /** Поле «медиа»: ссылка на файл или пусто → заштрихованный плейсхолдер. */
 function media_fields($key, $i, $row) { ?>
   <div style="flex:2"><label>Ссылка на фото или видео</label>
-    <input name="<?= $key ?>[src][<?= $i ?>]" value="<?= h($row['src'] ?? '') ?>" placeholder="/uploads/… или https://…"></div>
+    <input name="<?= $key ?>[src][<?= $i ?>]" value="<?= h($row['src'] ?? '') ?>" list="medialist" placeholder="/uploads/… или https://…"></div>
   <div style="flex:1"><label>Подпись (и текст заглушки)</label>
     <input name="<?= $key ?>[label][<?= $i ?>]" value="<?= h($row['label'] ?? '') ?>"></div>
 <?php }
 
 head('Блоки'); ?>
 <h1>Блоки страницы</h1>
+<datalist id="medialist">
+  <?php foreach ($mediaList as $m): ?>
+    <option value="<?= h(media_url($m['file'])) ?>"><?= h($m['alt']) ?></option>
+  <?php endforeach; ?>
+</datalist>
 <?php if ($msg): ?><div class="msg"><?= h($msg) ?></div><?php endif; ?>
 
 <div class="panel row">
@@ -232,7 +238,7 @@ head('Блоки'); ?>
       <div class="row">
         <?php for ($i = 0; $i < 3; $i++): ?>
           <div style="flex:1"><label>Фото <?= $i + 1 ?></label>
-            <input name="shots[<?= $i ?>]" value="<?= h($d['shots'][$i] ?? '') ?>" placeholder="/uploads/… или https://…"></div>
+            <input name="shots[<?= $i ?>]" value="<?= h($d['shots'][$i] ?? '') ?>" list="medialist" placeholder="/uploads/… или https://…"></div>
         <?php endfor; ?>
       </div>
       <label>Позиции комплекта (по одной в строке, нумеруются сами)</label>
