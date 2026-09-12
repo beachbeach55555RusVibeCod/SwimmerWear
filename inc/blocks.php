@@ -211,3 +211,16 @@ if (!function_exists('lc')) {
     return function_exists('mb_strtolower') ? mb_strtolower((string)$s, 'UTF-8') : strtolower((string)$s);
   }
 }
+
+/** Заглушка вместо фото — рисуется прямо в ссылке, без обращения к серверу. */
+function placeholder_src($label) {
+  $label = (string)$label;
+  $label = h(function_exists('mb_substr') ? mb_substr($label, 0, 40, 'UTF-8') : substr($label, 0, 80));
+  $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">'
+       . '<rect width="900" height="1200" fill="#EDEFEF"/>'
+       . '<path d="M0 0L900 1200M900 0L0 1200" stroke="#D6DADA" stroke-width="2"/>'
+       . '<rect x="120" y="540" width="660" height="120" fill="#EDEFEF"/>'
+       . '<text x="450" y="615" font-family="Inter,sans-serif" font-size="34" fill="#7E8688" text-anchor="middle">'
+       . $label . '</text></svg>';
+  return 'data:image/svg+xml;charset=utf-8,' . rawurlencode($svg);
+}

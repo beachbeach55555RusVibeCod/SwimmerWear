@@ -87,11 +87,12 @@ foreach ($prods as $p) {
       $seenColor[$key] = 1;
       $SW['colors'][] = ['id'=>$key, 'name'=>$c['name'], 'hex'=>$colorHex[$key] ?? '#7E8688'];
     }
+    /* app.js ждёт здесь простые ссылки, не объекты */
     $shots = [];
     foreach ($shotsAll as $s)
       if ($s['color'] === null || $s['color'] === '' || lc($s['color']) === $key)
-        $shots[] = ['type'=>'image','src'=>media_url($s['file']),'alt'=>$p['name']];
-    if (!$shots) $shots[] = ['type'=>'placeholder','label'=>$p['name'] . ' ' . $c['name']];
+        $shots[] = media_url($s['file']);
+    if (!$shots) $shots[] = placeholder_src($p['name'] . ' · ' . $c['name']);
 
     $SW['products'][] = [
       'id'=>$p['id'] . '-' . $key, 'name'=>$p['name'], 'colorId'=>$key,
