@@ -41,8 +41,3 @@ function setting($key, $default = '') {
   }
   return $all[$key] ?? $default;
 }
-
-/** Нижний регистр с поддержкой кириллицы, если есть mbstring. */
-function lc($s) {
-  return function_exists('mb_strtolower') ? mb_strtolower((string)$s, 'UTF-8') : strtolower((string)$s);
-}

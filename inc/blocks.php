@@ -204,3 +204,10 @@ function media_url($file) {
   $file = (string)$file;
   return preg_match('~^https?://~i', $file) ? $file : UPLOAD_URL . '/' . ltrim($file, '/');
 }
+
+/** Нижний регистр с поддержкой кириллицы, если есть mbstring. */
+if (!function_exists('lc')) {
+  function lc($s) {
+    return function_exists('mb_strtolower') ? mb_strtolower((string)$s, 'UTF-8') : strtolower((string)$s);
+  }
+}
