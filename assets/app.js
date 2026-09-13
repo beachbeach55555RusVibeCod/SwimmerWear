@@ -157,8 +157,10 @@ function mediaNode(m, phClass){
   }
   function tick(){ clearInterval(t); if (SCENARIOS.length > 1) t = setInterval(function(){ go(i+1); }, 7000); }
 
-  paint();
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) tick();
+  if (SCENARIOS.length) {
+    paint();
+  }
+  if (SCENARIOS.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) tick();
 })();
 
 /* ========================== КОНСТРУКЦИЯ ========================== */
