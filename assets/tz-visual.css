@@ -1,0 +1,164 @@
+:root{
+  --tz-fog:#ECEEEE;
+  --tz-fog-2:#E4E7E7;
+  --tz-khaki:#575E43;
+  --tz-ink:#171B1C;
+  --tz-muted:#727A7C;
+  --tz-white:#FFF;
+  --tz-line:#CDD2D2;
+}
+
+/* SWIMMER / визуальная система по ТЗ */
+body{font-family:Inter,"Inter Display",system-ui,sans-serif;color:var(--tz-ink);background:#fff;letter-spacing:-.005em}
+h1,h2,h3,.display,.card .price,.pprice,.q summary,.tech-list b{font-family:"Inter Display",Inter,system-ui,sans-serif;font-weight:600;letter-spacing:-.035em}
+.wrap{max-width:1360px;padding-left:32px;padding-right:32px}
+section{padding:112px 0}
+.sec-head{margin-bottom:52px}
+.sec-head h2{text-transform:none;font-size:clamp(32px,4vw,56px)}
+.lede{font-size:16px;line-height:1.65}
+
+header{background:rgba(236,238,238,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(23,27,28,.12)}
+.bar{height:72px}
+.logo img{height:22px}
+.menu{gap:38px;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.menu button,.menu a{padding:5px 0}
+.tools{gap:10px}
+.cart-open{width:42px;height:42px;padding:0;border:0;font-size:0;position:relative;display:grid;place-items:center}
+.cart-open:before{content:"";width:18px;height:15px;border:1.5px solid currentColor;border-top:0;display:block;transform:skew(-7deg);border-radius:1px}
+.cart-open:after{content:"•  •";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:3px;line-height:1}
+.cart-open #cartCount{position:absolute;right:0;top:2px;min-width:16px;height:16px;border-radius:50%;background:var(--tz-khaki);color:#fff;font-size:9px;display:grid;place-items:center;line-height:1}
+
+.hero{height:calc(100svh - 72px);min-height:620px;max-height:none}
+.hero-veil{background:linear-gradient(180deg,rgba(10,13,14,.08) 0%,rgba(10,13,14,.18) 38%,rgba(10,13,14,.84) 100%)}
+.hero-in{padding-top:120px;padding-bottom:52px}
+.hero-t1{font-size:11px;letter-spacing:.24em;margin-bottom:20px}
+.hero-in h1{font-size:clamp(48px,8vw,118px);line-height:.9;letter-spacing:-.055em;max-width:8ch}
+.hero-t2{font-size:18px;line-height:1.45;max-width:42ch;margin-top:22px}
+.hero-cta{margin-top:30px;min-width:190px;text-align:center;padding:15px 34px;font-size:12px;letter-spacing:.18em}
+.specs{margin-top:54px;gap:0;border-top:1px solid rgba(255,255,255,.35);padding-top:20px}
+.spec{padding-right:26px;min-height:60px;border-right:1px solid rgba(255,255,255,.2)}
+.spec:last-child{border-right:0}
+.spec svg{width:24px;height:24px}
+.spec b{font-size:15px;letter-spacing:.01em}
+.spec span{font-size:11px;max-width:22ch}
+.hero-arrows{top:20px;right:32px}
+.hero-dots{top:37px;left:32px}
+
+.products{background:var(--tz-fog)}
+.prod-top{align-items:end;margin-bottom:46px}
+.products .prod-top h2{max-width:12ch}
+.rail-btns button,.build-nav button{width:46px;height:46px;background:transparent;border:1px solid #BFC5C5}
+.rail-btns button:hover,.build-nav button:hover{background:var(--tz-ink);color:#fff;border-color:var(--tz-ink)}
+.rail{grid-auto-columns:calc((100% - 48px)/3);gap:24px;padding-bottom:10px}
+.card{border:0;background:#fff}
+.card:hover{border-color:transparent;transform:translateY(-3px);transition:transform .25s ease}
+.card .shot{aspect-ratio:4/5;background:var(--tz-fog-2)}
+.card .cbody{padding:22px 22px 26px}
+.card h3{font-size:19px}
+.card .col{font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.card .price{font-size:20px;margin-top:12px}
+
+.scen{height:min(82svh,820px);min-height:560px}
+.sc-in{padding-top:64px;padding-bottom:56px}
+.sc-in h2{font-size:clamp(40px,5vw,72px);letter-spacing:-.045em;max-width:10ch}
+.sc-box{max-width:520px;padding-left:22px;border-left:1px solid rgba(255,255,255,.55)}
+.sc-box h3{font-size:24px}
+.sc-box p{font-size:15px;line-height:1.6}
+
+.tech-grid{grid-template-columns:.9fr 1.1fr;gap:90px}
+.tech-list div{padding:24px 0}
+.tech-list b{font-size:15px;text-transform:uppercase;letter-spacing:.08em}
+.tech-list p{font-size:14px;max-width:50ch}
+.tech-grid>div:last-child{background:var(--tz-fog);padding:34px;min-height:420px;display:flex;align-items:center;justify-content:center}
+
+.build{background:var(--tz-fog)}
+.build-grid{grid-template-columns:.75fr 1.25fr;gap:80px}
+.build-left{position:sticky;top:110px}
+.build-left h2{font-size:clamp(34px,4vw,58px);max-width:9ch}
+.build-left p{font-size:16px;line-height:1.7;max-width:36ch}
+.det-rail{grid-auto-columns:minmax(260px,34%);gap:18px}
+.det{border:0;background:#fff}
+.det .ph{aspect-ratio:4/5}
+.det .cap{padding:20px 20px 24px}
+.det .cap h3{font-size:18px}
+.det .cap p{font-size:13px;line-height:1.55}
+
+.kit-grid{grid-template-columns:1.5fr .5fr;gap:72px}
+.kit-shots{gap:10px}
+.kit-list{margin-top:18px}
+.kit-list li{padding:19px 0;font-size:15px}
+.kit-list span{font-size:11px}
+
+.faq{max-width:1040px}
+.q summary{font-size:19px;padding:25px 0}
+.q .a{font-size:15px;line-height:1.65;padding-bottom:25px}
+
+.revs{grid-template-columns:repeat(3,1fr);gap:14px}
+.rev{min-height:260px;padding:34px 30px;background:var(--tz-khaki);justify-content:flex-end}
+.rev .mark{display:none}
+.rev p{font-size:18px;line-height:1.5;letter-spacing:-.01em}
+
+footer{padding:88px 0 34px;background:var(--tz-ink)}
+.fgrid{grid-template-columns:1.6fr .7fr .7fr;gap:70px}
+.fbrand img{height:28px}
+.fslogan{font-size:17px;line-height:1.4;color:#AEB4B4}
+footer h4{font-size:10px;letter-spacing:.18em;color:#858C8D}
+footer a,footer button{font-size:13px;padding:4px 0}
+.fbot{margin-top:70px;padding-top:20px;font-size:11px}
+
+.modal{width:min(1180px,94vw);box-shadow:0 24px 80px rgba(0,0,0,.18)}
+.modal.narrow{width:min(640px,94vw)}
+.mhead{padding:20px 30px}
+.mhead h3{font-size:16px;letter-spacing:.04em;text-transform:uppercase}
+.mbody{padding:32px}
+.pcard{gap:52px}
+.pinfo h2{font-size:clamp(30px,4vw,48px);line-height:.98}
+.pprice{font-size:30px}
+.add{background:var(--tz-khaki)!important;color:#fff!important;border-color:var(--tz-khaki)!important;letter-spacing:.1em}
+.add:hover{background:var(--tz-ink)!important;border-color:var(--tz-ink)!important}
+
+/* мобильная версия — крупнее медиа, меньше декора */
+@media(max-width:900px){
+  .wrap{padding-left:20px;padding-right:20px}
+  section{padding:76px 0}
+  .bar{height:64px}
+  .menu{display:none}
+  .burger{display:block}
+  .cart-open{margin-right:2px}
+  .hero{height:calc(100svh - 64px);min-height:650px}
+  .hero-in{padding-bottom:34px}
+  .hero-in h1{font-size:clamp(48px,15vw,82px)}
+  .hero-t2{font-size:15px}
+  .specs{grid-template-columns:repeat(2,1fr);gap:0;margin-top:34px}
+  .spec{padding:12px 12px 12px 0;border-right:0;border-bottom:1px solid rgba(255,255,255,.2)}
+  .spec:nth-child(odd){border-right:1px solid rgba(255,255,255,.2)}
+  .spec:nth-last-child(-n+2){border-bottom:0}
+  .spec span{font-size:10px}
+  .rail{grid-auto-columns:84vw;gap:14px}
+  .scen{min-height:620px}
+  .sc-in{padding-top:36px;padding-bottom:34px}
+  .tech-grid,.build-grid,.kit-grid{grid-template-columns:1fr;gap:36px}
+  .tech-grid>div:last-child{min-height:320px;padding:20px}
+  .build-left{position:static}
+  .det-rail{grid-auto-columns:78vw}
+  .kit-shots{grid-template-columns:repeat(3,1fr);gap:6px}
+  .revs{grid-template-columns:1fr}
+  .rev{min-height:190px}
+  .fgrid{grid-template-columns:1fr 1fr;gap:34px}
+  .fbrand{grid-column:1/-1}
+  .pcard{grid-template-columns:1fr;gap:28px}
+}
+
+@media(max-width:560px){
+  .hero-t1{font-size:9px;letter-spacing:.16em}
+  .hero-cta{width:100%}
+  .hero-arrows{right:20px}
+  .hero-dots{left:20px}
+  .prod-top{align-items:flex-start;flex-direction:column}
+  .kit-grid{gap:28px}
+  .kit-shots{grid-template-columns:1fr 1fr 1fr}
+  .fgrid{grid-template-columns:1fr}
+  .fbrand{grid-column:auto}
+  .mhead{padding:16px 20px}
+  .mbody{padding:22px 20px}
+}
