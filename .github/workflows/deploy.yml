@@ -1,0 +1,82 @@
+name: Deploy to REG.RU
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          REG_HOST: ${{ secrets.REG_HOST }}
+          REG_SSH_KEY: ${{ secrets.REG_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$REG_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$REG_HOST" >> ~/.ssh/known_hosts
+
+      - name: Backup production
+        env:
+          REG_HOST: ${{ secrets.REG_HOST }}
+          REG_USER: ${{ secrets.REG_USER }}
+          REG_PATH: ${{ secrets.REG_PATH }}
+        run: |
+          set -euo pipefail
+          ssh "$REG_USER@$REG_HOST" "
+            set -e;
+            BACKUP_DIR=\"$(dirname "$REG_PATH")/deploy-backups\";
+            mkdir -p \"\$BACKUP_DIR\";
+            tar \
+              --exclude='./config.php' \
+              --exclude='./uploads' \
+              --exclude='./uploads/*' \
+              --exclude='./deploy-backup-*' \
+              -czf \"\$BACKUP_DIR/swimmer-$(date +%Y%m%d-%H%M%S).tar.gz\" \
+              -C \"$REG_PATH\" .
+          "
+
+      - name: Deploy files
+        env:
+          REG_HOST: ${{ secrets.REG_HOST }}
+          REG_USER: ${{ secrets.REG_USER }}
+          REG_PATH: ${{ secrets.REG_PATH }}
+        run: |
+          set -euo pipefail
+          rsync -az \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='config.php' \
+            --exclude='uploads/' \
+            --exclude='deploy.php' \
+            ./ "$REG_USER@$REG_HOST:$REG_PATH/"
+
+      - name: PHP syntax checks
+        env:
+          REG_HOST: ${{ secrets.REG_HOST }}
+          REG_USER: ${{ secrets.REG_USER }}
+          REG_PATH: ${{ secrets.REG_PATH }}
+        run: |
+          set -euo pipefail
+          ssh "$REG_USER@$REG_HOST" "cd '$REG_PATH' && php -l index.php && php -l order.php"
+
+      - name: Production smoke test
+        run: |
+          set -euo pipefail
+          curl --fail --retry 3 --retry-delay 2 http://odejdalike.ru/ >/dev/null
