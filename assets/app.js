@@ -180,8 +180,8 @@ function mediaNode(m, phClass){
     if (!first) return;
     rail.scrollBy({ left: dir * (first.offsetWidth + 20), behavior:'smooth' });
   }
-  document.getElementById('dNext').addEventListener('click', function(){ step(1); });
-  document.getElementById('dPrev').addEventListener('click', function(){ step(-1); });
+  var dNext = document.getElementById('dNext'); if (dNext) dNext.addEventListener('click', function(){ step(1); });
+  var dPrev = document.getElementById('dPrev'); if (dPrev) dPrev.addEventListener('click', function(){ step(-1); });
 })();
 
 /* ========================== МОДАЛКИ ========================== */
