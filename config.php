@@ -79,9 +79,10 @@ if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'install.php') {
   }
 }
 
-// Автоматически подключаем production-fixes.js только к витрине.
+// Автоматически подключаем production-fixes.js и визуальные стили только к витрине.
 if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'index.php') {
   register_shutdown_function(function () {
+    echo '<link rel="stylesheet" href="/assets/tz-visual.css">';
     echo '<script src="/assets/production-fixes.js" defer></script>';
   });
 }
