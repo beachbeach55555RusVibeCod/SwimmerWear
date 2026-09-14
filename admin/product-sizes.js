@@ -35,7 +35,7 @@
   colorsPanel.insertAdjacentElement('afterend',panel);
 
   var style=document.createElement('style');
-  style.textContent='.product-size-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.product-size-chip{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:7px 10px;border:1px solid #cfd4d5;background:#fff;font-size:12px}.product-size-chip button{border:0;background:none;color:#8b9192;cursor:pointer;font-size:16px;line-height:1;padding:0}.product-size-chip button:hover{color:#963d3d}.product-size-presets{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}.product-size-add{margin-top:4px}.product-size-status{min-height:20px;margin-top:8px;font-size:12px;color:#576044}.product-size-status.err{color:#963d3d}@media(max-width:700px){.product-size-add{align-items:stretch;flex-direction:column}.product-size-add .btn{align-self:stretch!important}}';
+  style.textContent='.product-size-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.product-size-chip{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:7px 10px;border:1px solid #cfd4d5;background:#fff;font-size:12px;transition:.15s ease}.product-size-chip button{border:0;background:none;color:#8b9192;cursor:pointer;font-size:16px;line-height:1;padding:0}.product-size-chip button:hover{color:#963d3d}.product-size-chip.is-confirm{border-color:#c98a8a;background:#fff5f5}.product-size-chip.is-confirm button{color:#963d3d;font-size:11px;font-weight:700}.product-size-presets{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}.product-size-add{margin-top:4px}.product-size-status{min-height:20px;margin-top:8px;font-size:12px;color:#576044}.product-size-status.err{color:#963d3d}@media(max-width:700px){.product-size-add{align-items:stretch;flex-direction:column}.product-size-add .btn{align-self:stretch!important}}';
   document.head.appendChild(style);
 
   var chips=panel.querySelector('[data-size-chips]');
@@ -51,11 +51,26 @@
       var label=document.createElement('span'); label.textContent=size;
       var del=document.createElement('button'); del.type='button'; del.textContent='×'; del.title='Удалить размер '+size;
       del.addEventListener('click',function(){
-        if(!confirm('Удалить размер «'+size+'» у всех цветов товара? Остатки этого размера будут удалены.'))return;
+        if(del.dataset.confirm!=='1'){
+          del.dataset.confirm='1';
+          del.textContent='Удалить?';
+          chip.classList.add('is-confirm');
+          setStatus('Нажмите «Удалить?» ещё раз, чтобы удалить размер '+size+'.');
+          setTimeout(function(){
+            if(del.dataset.confirm==='1'){
+              del.dataset.confirm='';
+              del.textContent='×';
+              chip.classList.remove('is-confirm');
+              if(status.textContent.indexOf('Нажмите «Удалить?»')===0)setStatus('');
+            }
+          },2500);
+          return;
+        }
+        del.disabled=true;
         setStatus('Удаляем…');
         request('product-size.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:formData({a:'delete',pid:pid,size:size}).toString()})
           .then(function(x){render(x.sizes);setStatus('Размер удалён');})
-          .catch(function(e){setStatus(e.message,true);});
+          .catch(function(e){del.disabled=false;setStatus(e.message,true);});
       });
       chip.appendChild(label); chip.appendChild(del); chips.appendChild(chip);
     });
