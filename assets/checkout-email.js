@@ -3,7 +3,7 @@
 
   function cart(){ return Array.isArray(window.CART) ? window.CART : []; }
   function money(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ') + ' ₽'; }
-  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g,function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]; }); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g,function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[ch]; }); }
 
   var style=document.createElement('style');
   style.textContent='\
@@ -52,7 +52,7 @@
       email:form.email.value.trim(),
       comment:form.comment.value.trim(),
       website:form.website.value,
-      items:cart().map(function(it){ return {sku:it.sku,color:it.color,size:it.size,qty:it.qty}; })
+      items:cart().map(function(it){ return {product_id:it.productId||it.product_id||0,sku:it.sku,color:it.color,size:it.size,qty:it.qty}; })
     };
     btn.disabled=true;
     status.className='checkout-mail-status';
