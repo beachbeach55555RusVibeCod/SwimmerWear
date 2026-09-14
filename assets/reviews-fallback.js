@@ -142,3 +142,11 @@
   trimSizes();
   new MutationObserver(trimSizes).observe(body,{childList:true,subtree:true});
 })();
+
+(function(){
+  'use strict';
+  var style=document.createElement('style');
+  style.id='uniform-section-headings';
+  style.textContent='.products .prod-top h2,.scen .sc-in h2,#tech .sec-head h2,.build-showcase__copy h2,.kit-showcase__copy h2,#faq .sec-head h2,.reviews-showcase h2{font-size:52px!important;line-height:1.02!important;letter-spacing:-.04em!important;font-family:"Inter Display","Inter Regular",Inter,system-ui,sans-serif!important;font-weight:600!important}.scen .sc-in h2{max-width:none!important;white-space:nowrap!important}@media(max-width:900px){.products .prod-top h2,.scen .sc-in h2,#tech .sec-head h2,.build-showcase__copy h2,.kit-showcase__copy h2,#faq .sec-head h2,.reviews-showcase h2{font-size:40px!important}.scen .sc-in h2{white-space:normal!important}}@media(max-width:560px){.products .prod-top h2,.scen .sc-in h2,#tech .sec-head h2,.build-showcase__copy h2,.kit-showcase__copy h2,#faq .sec-head h2,.reviews-showcase h2{font-size:34px!important}}';
+  document.head.appendChild(style);
+})();
