@@ -13,6 +13,7 @@ function head($title) { ?>
   <div class="brand">SWIMMER<span>CMS</span></div>
   <nav>
     <a href="product-cards.php">Карточки товара</a>
+    <a href="visuals.php">Редактор медиа</a>
   </nav>
   <a class="out" href="logout.php">Выйти</a>
 </aside>
