@@ -1,6 +1,21 @@
 (function(){
   'use strict';
   document.addEventListener('DOMContentLoaded',function(){
+    var params=new URLSearchParams(window.location.search);
+    if(params.get('edit') && !document.querySelector('.product-card-back')){
+      var h1=document.querySelector('main h1');
+      if(h1){
+        var back=document.createElement('a');
+        back.href='product-cards.php';
+        back.className='btn grey product-card-back';
+        back.textContent='← К списку карточек';
+        h1.insertAdjacentElement('beforebegin',back);
+      }
+      var backStyle=document.createElement('style');
+      backStyle.textContent='.product-card-back{display:inline-flex;align-items:center;margin:0 0 14px;text-decoration:none}';
+      document.head.appendChild(backStyle);
+    }
+
     var form=null,input=null;
     Array.prototype.slice.call(document.querySelectorAll('form')).forEach(function(f){
       var i=f.querySelector('input[name="color"]');
