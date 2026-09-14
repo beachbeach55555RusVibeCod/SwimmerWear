@@ -67,7 +67,7 @@
     Array.prototype.slice.call(nav.children).forEach(function(el){
       if((el.textContent||'').trim().toLowerCase()==='контакты') contacts=el;
     });
-    if(contacts && contacts.nextSibling) nav.insertBefore(link,contacts.nextSibling);
+    if(contacts) nav.insertBefore(link,contacts);
     else nav.appendChild(link);
   }
   addBrandLink(document.querySelector('header .menu'));
