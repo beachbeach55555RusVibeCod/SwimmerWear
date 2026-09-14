@@ -22,6 +22,7 @@ function head($title) { ?>
   <nav>
     <a href="product-cards.php">Карточки товара</a>
     <a href="visuals.php">Редактор медиа</a>
+    <a href="contacts.php">Редактор контактов</a>
   </nav>
   <a class="out" href="logout.php">Выйти</a>
 </aside>
