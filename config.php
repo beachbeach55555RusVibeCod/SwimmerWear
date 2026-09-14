@@ -84,5 +84,6 @@ if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'index.php') {
   register_shutdown_function(function () {
     echo '<link rel="stylesheet" href="/assets/tz-visual.css">';
     echo '<script src="/assets/production-fixes.js" defer></script>';
+    echo '<script src="/assets/header-brand-fix.js?v=1" defer></script>';
   });
 }
