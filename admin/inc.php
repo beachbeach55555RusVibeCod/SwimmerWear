@@ -9,15 +9,7 @@ function head($title) { ?>
 <div class="layout">
 <aside>
   <div class="brand">SWIMMER<span>CMS</span></div>
-  <nav>
-    <a href="index.php">Страницы</a>
-    <a href="visuals.php">Фото, видео и надписи</a>
-    <a href="blocks.php">Блоки</a>
-    <a href="products.php">Товары</a>
-    <a href="media.php">Медиа</a>
-    <a href="menu.php">Меню</a>
-    <a href="settings.php">Настройки</a>
-  </nav>
+  <nav></nav>
   <a class="out" href="logout.php">Выйти</a>
 </aside>
 <main>
