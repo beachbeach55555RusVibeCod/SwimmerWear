@@ -81,3 +81,40 @@
   css.textContent='.hero-veil{background:linear-gradient(90deg,rgba(10,13,14,.72) 0%,rgba(10,13,14,.52) 36%,rgba(10,13,14,.12) 72%),linear-gradient(180deg,rgba(10,13,14,.04),rgba(10,13,14,.38))}.hero-in{padding-top:108px;padding-bottom:46px;justify-content:flex-end;align-items:flex-start}.hero-t1{font-size:11px;line-height:1.25;letter-spacing:.14em;margin-bottom:12px;max-width:300px}.hero-in h1{font-size:clamp(48px,6.6vw,88px);line-height:.92;letter-spacing:-.05em;max-width:none;margin:0;text-transform:uppercase}.hero-t2{font-size:16px;line-height:1.42;max-width:520px;margin-top:14px}.hero .specs{display:grid;grid-template-columns:repeat(4,minmax(125px,1fr));gap:22px;max-width:780px;margin-top:30px;border-top:0;padding-top:0}.hero .spec{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding-right:0;min-height:0;border-right:0}.hero .spec svg{width:24px;height:24px;stroke:rgba(255,255,255,.95);stroke-width:1.35;fill:none;margin-top:1px}.hero .spec b{display:block;font-size:14px;line-height:1.2;letter-spacing:.01em}.hero .spec span{display:block;margin-top:5px;font-size:10px;line-height:1.35;max-width:150px;color:rgba(255,255,255,.72)}.hero-cta{margin-top:26px;min-width:150px;text-align:center;padding:13px 30px;font-size:11px;letter-spacing:.14em;background:#fff;color:#171B1C;border:1px solid #fff}.hero-cta:hover{background:transparent;color:#fff}@media(max-width:900px){.hero .specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px;max-width:560px}.hero-in h1{font-size:clamp(46px,13vw,76px)}.hero-t2{font-size:15px;max-width:480px}}@media(max-width:560px){.hero-in{padding-bottom:30px}.hero .specs{margin-top:24px}.hero .spec span{font-size:9px}.hero-cta{margin-top:22px}}';
   document.head.appendChild(css);
 })();
+
+(function(){
+  'use strict';
+  var data=[
+    {title:'Вода',text:'Длина закрывает поясницу в лодке, капюшон регулируется под ветер с воды.',src:'https://images.unsplash.com/photo-1699645257408-70f18e50991f?auto=format&fit=crop&q=82&w=1920&h=1080'},
+    {title:'Природа',text:'Плотная ткань 140 g/m не боится веток и мокрой травы.',src:'https://images.unsplash.com/photo-1610817118922-a7374b775fd9?auto=format&fit=crop&q=82&w=1920&h=1080'},
+    {title:'Свобода',text:'Сложили в фирменный мешок, убрали в багажник — и парка едет с вами.',src:'https://images.unsplash.com/photo-1667331634686-313ec875d91e?auto=format&fit=crop&q=82&w=1920&h=1080'}
+  ];
+  var sec=document.getElementById('scenarios');
+  if(!sec){
+    sec=document.createElement('section');sec.className='scen';sec.id='scenarios';sec.setAttribute('aria-label','Сценарии использования');
+    sec.innerHTML='<div id="scenSlides"></div><div class="wrap sc-in"><h2>Вода. Природа. Свобода.</h2><div class="sc-box" id="scBox"></div></div><div class="scen-dots" id="scenDots"></div>';
+    var product=document.getElementById('product');
+    if(product && product.parentNode) product.parentNode.insertBefore(sec,product.nextSibling); else document.querySelector('main,body').appendChild(sec);
+  }
+  var title=sec.querySelector('.sc-in h2'); if(title) title.textContent='Вода. Природа. Свобода.';
+  var slides=sec.querySelector('#scenSlides'), dots=sec.querySelector('#scenDots'), box=sec.querySelector('#scBox');
+  if(!slides||!dots||!box)return;
+  if(slides.children.length)return;
+  var i=0,t=null;
+  data.forEach(function(s,n){
+    var slide=document.createElement('div');slide.className='sc'+(n===0?' on':'');
+    slide.innerHTML='<div class="med"><img src="'+s.src+'" alt="'+s.title+'"></div><div class="shade"></div>';
+    slides.appendChild(slide);
+    var d=document.createElement('button');d.type='button';d.setAttribute('aria-label','Сценарий '+(n+1));d.setAttribute('aria-current',n===0?'true':'false');
+    d.addEventListener('click',function(){go(n);});dots.appendChild(d);
+  });
+  function paint(){box.innerHTML='<h3>'+data[i].title+'</h3><p>'+data[i].text+'</p>';}
+  function go(n){
+    var a=slides.children,b=dots.children;if(!a.length)return;
+    a[i].classList.remove('on');b[i].setAttribute('aria-current','false');
+    i=(n+a.length)%a.length;a[i].classList.add('on');b[i].setAttribute('aria-current','true');paint();tick();
+  }
+  function tick(){clearInterval(t);if(data.length>1)t=setInterval(function(){go(i+1);},7000);}
+  paint();
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)tick();
+})();
