@@ -140,3 +140,12 @@
   css.textContent='.scen-arrows{position:absolute;top:20px;right:32px;z-index:6;display:flex;gap:8px}.scen-arrows button{width:38px;height:38px;border:1px solid rgba(255,255,255,.45);color:#fff;display:grid;place-items:center;font-size:18px;line-height:1;background:transparent}.scen-arrows button:hover{background:rgba(255,255,255,.16)}@media(max-width:900px){.scen-arrows{top:18px;right:20px}}';
   document.head.appendChild(css);
 })();
+
+(function(){
+  'use strict';
+  if(document.getElementById('tech')) return;
+  var s=document.createElement('script');
+  s.src='/assets/tech-fallback.js?v=2';
+  s.defer=true;
+  document.body.appendChild(s);
+})();
