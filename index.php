@@ -248,5 +248,6 @@ if (!$blocks) echo '<section><div class="wrap"><h1>' . h($page['title']) . '</h1
 <script src="/assets/app.js"></script>
 <script src="/assets/tech-fallback.js"></script>
 <script src="/assets/build-fallback.js"></script>
+<script src="/assets/reviews-fallback.js?v=1"></script>
 </body>
 </html>
