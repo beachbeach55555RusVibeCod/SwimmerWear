@@ -15,9 +15,10 @@ function json_fail($message, $code=400) {
 }
 
 function send_order_email($orderId, $name, $phone, $email, $comment, $resolved, $total) {
-  $to = trim((string)setting('order_email', setting('email', '')));
+  // Все заказы всегда отправляем на рабочий e-mail сайта — тот же, что указан в контактах.
+  $to = trim((string)setting('email', ''));
   if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
-    error_log('Order #' . $orderId . ': notification email is not configured');
+    error_log('Order #' . $orderId . ': work email is not configured');
     return false;
   }
 
