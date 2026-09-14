@@ -104,5 +104,6 @@ $isVideo = preg_match('~\.(mp4|webm)(?:\?|$)~i', $media);
   document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
 })();
 </script>
+<script src="/assets/footer-socials.js?v=1"></script>
 </body>
 </html>
