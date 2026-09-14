@@ -115,17 +115,38 @@ try {
   $resolved = [];
   $total = 0;
   foreach ($items as $item) {
+    $productId = (int)($item['product_id'] ?? 0);
     $sku = trim((string)($item['sku'] ?? ''));
     $color = trim((string)($item['color'] ?? ''));
     $size = trim((string)($item['size'] ?? ''));
     $qty = (int)($item['qty'] ?? 0);
-    if ($sku === '' || $color === '' || $size === '' || $qty < 1 || $qty > 20) json_fail('Проверьте состав заказа.');
+    if (($productId < 1 && $sku === '') || $color === '' || $size === '' || $qty < 1 || $qty > 20) json_fail('Проверьте состав заказа.');
 
-    $st = $pdo->prepare("SELECT p.id,p.sku,p.name,p.price,v.stock FROM products p JOIN variants v ON v.product_id=p.id WHERE p.sku=? AND p.status='published' AND v.color=? AND v.size=? LIMIT 1 FOR UPDATE");
-    $st->execute([$sku,$color,$size]);
+    if ($productId > 0) {
+      $st = $pdo->prepare("SELECT p.id,p.sku,p.name,p.price,v.id AS variant_id,v.stock
+                           FROM products p
+                           JOIN variants v ON v.product_id=p.id
+                           WHERE p.id=? AND p.status='published'
+                             AND LOWER(TRIM(v.color))=LOWER(TRIM(?))
+                             AND UPPER(TRIM(v.size))=UPPER(TRIM(?))
+                           LIMIT 1 FOR UPDATE");
+      $st->execute([$productId,$color,$size]);
+    } else {
+      // Совместимость со старыми корзинами без product_id.
+      $st = $pdo->prepare("SELECT p.id,p.sku,p.name,p.price,v.id AS variant_id,v.stock
+                           FROM products p
+                           JOIN variants v ON v.product_id=p.id
+                           WHERE p.sku=? AND p.status='published'
+                             AND LOWER(TRIM(v.color))=LOWER(TRIM(?))
+                             AND UPPER(TRIM(v.size))=UPPER(TRIM(?))
+                           ORDER BY v.stock DESC, p.id DESC
+                           LIMIT 1 FOR UPDATE");
+      $st->execute([$sku,$color,$size]);
+    }
+
     $v = $st->fetch();
     if (!$v) json_fail('Один из выбранных вариантов товара больше недоступен.');
-    if ((int)$v['stock'] < $qty) json_fail('Недостаточно товара на складе: ' . $v['name'] . ', ' . $color . ', ' . $size . '.');
+    if ((int)$v['stock'] < $qty) json_fail('Недостаточно товара на складе: ' . $v['name'] . ', ' . $color . ', ' . $size . '. Доступно: ' . (int)$v['stock'] . ' шт.');
 
     $resolved[] = [$v,$color,$size,$qty];
     $total += (int)$v['price'] * $qty;
@@ -136,10 +157,10 @@ try {
   $orderId = (int)$pdo->lastInsertId();
 
   $ins = $pdo->prepare('INSERT INTO order_items (order_id,product_id,sku,name,color,size,price,qty) VALUES (?,?,?,?,?,?,?,?)');
-  $dec = $pdo->prepare('UPDATE variants SET stock=stock-? WHERE product_id=? AND color=? AND size=? AND stock>=?');
+  $dec = $pdo->prepare('UPDATE variants SET stock=stock-? WHERE id=? AND stock>=?');
   foreach ($resolved as [$v,$color,$size,$qty]) {
     $ins->execute([$orderId,(int)$v['id'],$v['sku'],$v['name'],$color,$size,(int)$v['price'],$qty]);
-    $dec->execute([$qty,(int)$v['id'],$color,$size,$qty]);
+    $dec->execute([$qty,(int)$v['variant_id'],$qty]);
     if ($dec->rowCount() !== 1) json_fail('Остаток изменился. Повторите заказ.');
   }
   $pdo->commit();
