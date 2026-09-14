@@ -30,13 +30,26 @@
     return cut===-1?value:value.slice(0,cut);
   }
 
-  window.productByColor=function(_name,colorId){
+  window.productByColor=function(name,colorId){
     var products=window.PRODUCTS||[];
-    var selected=window.sel&&window.sel.productId!=null?window.sel.productId:'';
-    var base=baseProductId(selected);
-    for(var i=0;i<products.length;i++){
-      var p=products[i];
-      if(baseProductId(p.id)===base && p.colorId===colorId)return p;
+    var selectedId=window.sel&&window.sel.productId!=null?String(window.sel.productId):'';
+    var selectedBase=baseProductId(selectedId);
+    var selected=null;
+    var i,p;
+
+    for(i=0;i<products.length;i++){
+      if(String(products[i].id)===selectedId){selected=products[i];break;}
+    }
+    if(selected && selected.colorId===colorId)return selected;
+
+    for(i=0;i<products.length;i++){
+      p=products[i];
+      if(p.name===name && p.colorId===colorId && baseProductId(p.id)!==selectedBase)return p;
+    }
+
+    for(i=0;i<products.length;i++){
+      p=products[i];
+      if(p.name===name && p.colorId===colorId)return p;
     }
     return null;
   };
