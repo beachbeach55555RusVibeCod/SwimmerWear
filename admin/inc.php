@@ -11,8 +11,8 @@ function head($title) { ?>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= h($title) ?> — SWIMMER CMS</title>
 <link rel="stylesheet" href="admin.css">
-<script src="product-color-presets.js?v=1" defer></script>
-<script src="media-size-hints.js?v=1" defer></script>
+<script src="product-color-presets.js?v=2" defer></script>
+<script src="media-size-hints.js?v=2" defer></script>
 </head><body>
 <div class="layout">
 <aside>
