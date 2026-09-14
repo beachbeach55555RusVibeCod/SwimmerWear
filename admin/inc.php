@@ -7,6 +7,7 @@ function head($title) { ?>
 <title><?= h($title) ?> — SWIMMER CMS</title>
 <link rel="stylesheet" href="admin.css">
 <script src="product-color-presets.js?v=1" defer></script>
+<script src="media-size-hints.js?v=1" defer></script>
 </head><body>
 <div class="layout">
 <aside>
