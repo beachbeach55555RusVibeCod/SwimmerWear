@@ -13,6 +13,7 @@ function head($title) { ?>
 <link rel="stylesheet" href="admin.css">
 <script src="product-color-presets.js?v=2" defer></script>
 <script src="product-photo-colors.js?v=2" defer></script>
+<script src="product-photo-actions.js?v=1" defer></script>
 <script src="media-size-hints.js?v=2" defer></script>
 </head><body>
 <div class="layout">
