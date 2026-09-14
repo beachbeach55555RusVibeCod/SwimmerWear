@@ -118,3 +118,25 @@
   paint();
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)tick();
 })();
+
+(function(){
+  'use strict';
+  var sec=document.getElementById('scenarios');
+  if(!sec || sec.querySelector('.scen-arrows')) return;
+  var arrows=document.createElement('div');
+  arrows.className='scen-arrows';
+  arrows.innerHTML='<button type="button" class="scen-prev" aria-label="Предыдущий сценарий">&lsaquo;</button><button type="button" class="scen-next" aria-label="Следующий сценарий">&rsaquo;</button>';
+  sec.appendChild(arrows);
+  function move(dir){
+    var dots=sec.querySelectorAll('#scenDots button');
+    if(!dots.length) return;
+    var current=0;
+    for(var i=0;i<dots.length;i++) if(dots[i].getAttribute('aria-current')==='true'){current=i;break;}
+    dots[(current+dir+dots.length)%dots.length].click();
+  }
+  arrows.querySelector('.scen-prev').addEventListener('click',function(){move(-1);});
+  arrows.querySelector('.scen-next').addEventListener('click',function(){move(1);});
+  var css=document.createElement('style');
+  css.textContent='.scen-arrows{position:absolute;top:20px;right:32px;z-index:6;display:flex;gap:8px}.scen-arrows button{width:38px;height:38px;border:1px solid rgba(255,255,255,.45);color:#fff;display:grid;place-items:center;font-size:18px;line-height:1;background:transparent}.scen-arrows button:hover{background:rgba(255,255,255,.16)}@media(max-width:900px){.scen-arrows{top:18px;right:20px}}';
+  document.head.appendChild(css);
+})();
