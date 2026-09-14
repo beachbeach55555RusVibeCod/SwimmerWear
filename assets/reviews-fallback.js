@@ -126,3 +126,19 @@
     openContacts();
   },true);
 })();
+
+(function(){
+  'use strict';
+  function trimSizes(){
+    var row=document.querySelector('#pBody .sizes-row');
+    if(!row)return;
+    Array.prototype.slice.call(row.querySelectorAll('.sbtn')).forEach(function(btn,i){
+      var t=(btn.textContent||'').trim().toLowerCase();
+      if(i>=5 || t==='xxl' || t==='универсальный') btn.remove();
+    });
+  }
+  var body=document.getElementById('pBody');
+  if(!body)return;
+  trimSizes();
+  new MutationObserver(trimSizes).observe(body,{childList:true,subtree:true});
+})();
