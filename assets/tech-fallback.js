@@ -11,7 +11,7 @@
     <div class="wrap">\
       <div class="sec-head">\
         <h2>Технологии и материалы</h2>\
-        <p class="lede">Трёхслойная мембрана не пропускает воду снаружи и помогает отводить пар изнутри.</p>\
+        <p class="lede">Трёхслойная мембрана работает в обе стороны: не пропускает воду снаружи и выводит пар изнутри.</p>\
       </div>\
       <div class="tech-grid">\
         <div class="tech-diagram">\
@@ -31,10 +31,11 @@
           </svg>\
         </div>\
         <div class="tech-list">\
-          <div><b>3L MEMBRANE</b><p>Три слоя соединены в одно полотно.</p></div>\
-          <div><b>10K / 10K</b><p>Водостойкость снаружи и отведение пара изнутри.</p></div>\
-          <div><b>140 G/M² + DWR</b><p>Плотная верхняя ткань и водоотталкивающая обработка.</p></div>\
-          <div><b>WELLSOFT</b><p>Мягкая внутренняя подкладка для тепла и комфорта.</p></div>\
+          <article class="tech-item"><h3>3L MEMBRANE</h3><p>Три слоя соединены в одно полотно: верх, мембрана и подкладка не расходятся при движении.</p></article>\
+          <article class="tech-item"><h3>10K / 10K</h3><p>Столб воды 10 000 мм и такая же паропроницаемость — держит ливень и не превращается в парник.</p></article>\
+          <article class="tech-item"><h3>140 G/M²</h3><p>Плотная ткань верха: не рвётся о ветки и не парусит на ветру.</p></article>\
+          <article class="tech-item"><h3>DWR</h3><p>Пропитка заставляет воду скатываться каплями. Обновляется стиркой со спецсредством.</p></article>\
+          <article class="tech-item"><h3>WELLSOFT</h3><p>Подкладка с мягким ворсом — по ощущению ближе к пледу, чем к куртке.</p></article>\
         </div>\
       </div>\
     </div>';
@@ -42,6 +43,6 @@
   scenarios.parentNode.insertBefore(sec, scenarios.nextSibling);
 
   var css=document.createElement('style');
-  css.textContent='.tech-fallback{background:#fff}.tech-fallback .tech-diagram{background:#ECEEEE;padding:30px;display:flex;align-items:center;justify-content:center;min-height:420px}.tech-fallback .tech-diagram svg{width:100%;height:auto}.tech-fallback .vapour path{animation:techPulse 2.2s ease-in-out infinite}.tech-fallback .vapour path:nth-child(2){animation-delay:.25s}.tech-fallback .vapour path:nth-child(3){animation-delay:.5s}@keyframes techPulse{0%,100%{opacity:.35;transform:translateY(4px)}50%{opacity:1;transform:translateY(-4px)}}@media(max-width:900px){.tech-fallback .tech-diagram{min-height:320px;padding:18px}}@media(prefers-reduced-motion:reduce){.tech-fallback .vapour path{animation:none}}';
+  css.textContent='.tech-fallback{background:#fff}.tech-fallback .tech-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:48px;align-items:start}.tech-fallback .tech-diagram{background:#ECEEEE;padding:30px;display:flex;align-items:center;justify-content:center;min-height:420px}.tech-fallback .tech-diagram svg{width:100%;height:auto}.tech-fallback .tech-list{display:flex;flex-direction:column;gap:0;border-top:1px solid #D7DBDB}.tech-fallback .tech-list .tech-item{padding:18px 0 20px;border-bottom:1px solid #D7DBDB}.tech-fallback .tech-list .tech-item h3{margin:0 0 10px;font-family:"Inter Display","Inter",sans-serif;font-size:16px;line-height:1.1;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:#191D1E}.tech-fallback .tech-list .tech-item p{margin:0;max-width:360px;font-family:"Inter Regular","Inter",sans-serif;font-size:13px;line-height:1.55;color:#6F7778}.tech-fallback .vapour path{animation:techPulse 2.2s ease-in-out infinite}.tech-fallback .vapour path:nth-child(2){animation-delay:.25s}.tech-fallback .vapour path:nth-child(3){animation-delay:.5s}@keyframes techPulse{0%,100%{opacity:.35;transform:translateY(4px)}50%{opacity:1;transform:translateY(-4px)}}@media(max-width:900px){.tech-fallback .tech-grid{grid-template-columns:1fr;gap:28px}.tech-fallback .tech-diagram{min-height:320px;padding:18px}.tech-fallback .tech-list .tech-item p{max-width:none}}@media(prefers-reduced-motion:reduce){.tech-fallback .vapour path{animation:none}}';
   document.head.appendChild(css);
 })();
