@@ -234,6 +234,7 @@ if (!$blocks) echo '<section><div class="wrap"><h1>' . h($page['title']) . '</h1
 <script src="/assets/tech-fallback.js"></script>
 <script src="/assets/build-fallback.js"></script>
 <script src="/assets/reviews-fallback.js?v=6"></script>
+<script src="/assets/footer-socials.js?v=1"></script>
 <script src="/assets/brand-fallback.js?v=1"></script>
 <script src="/assets/hero-layout-fix.js?v=3"></script>
 </body>
