@@ -52,3 +52,33 @@
   style.textContent='header .bar{max-width:1360px;margin:0 auto;padding-left:32px;padding-right:32px}header .logo img{height:24px;width:auto}header .tools{justify-self:end}@media(max-width:900px){header .bar{padding-left:20px;padding-right:20px}header .logo img{height:24px}.cart-open{margin-right:0}}';
   document.head.appendChild(style);
 })();
+
+(function(){
+  'use strict';
+  function addBrandLink(nav){
+    if(!nav)return;
+    Array.prototype.slice.call(nav.querySelectorAll('a,button')).forEach(function(el){
+      if((el.textContent||'').trim().toLowerCase()==='о бренде') el.remove();
+    });
+    var link=document.createElement('a');
+    link.href='/brand.php';
+    link.textContent='О бренде';
+    var contacts=null;
+    Array.prototype.slice.call(nav.children).forEach(function(el){
+      if((el.textContent||'').trim().toLowerCase()==='контакты') contacts=el;
+    });
+    if(contacts && contacts.nextSibling) nav.insertBefore(link,contacts.nextSibling);
+    else nav.appendChild(link);
+  }
+  addBrandLink(document.querySelector('header .menu'));
+  addBrandLink(document.getElementById('mobileMenu'));
+
+  function removeBrandStory(){
+    var story=document.querySelector('.brand-story');
+    if(story)story.remove();
+  }
+  removeBrandStory();
+  var obs=new MutationObserver(function(){removeBrandStory();});
+  obs.observe(document.body,{childList:true,subtree:true});
+  setTimeout(function(){obs.disconnect();removeBrandStory();},5000);
+})();
