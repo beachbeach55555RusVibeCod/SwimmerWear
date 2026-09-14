@@ -14,6 +14,59 @@ function json_fail($message, $code=400) {
   exit;
 }
 
+function send_order_email($orderId, $name, $phone, $email, $comment, $resolved, $total) {
+  $to = trim((string)setting('order_email', setting('email', '')));
+  if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+    error_log('Order #' . $orderId . ': notification email is not configured');
+    return false;
+  }
+
+  $lines = [];
+  $lines[] = 'Новый заказ №' . $orderId;
+  $lines[] = '';
+  $lines[] = 'Клиент: ' . $name;
+  $lines[] = 'Телефон: ' . $phone;
+  if ($email !== '') $lines[] = 'E-mail: ' . $email;
+  if ($comment !== '') {
+    $lines[] = '';
+    $lines[] = 'Комментарий:';
+    $lines[] = $comment;
+  }
+  $lines[] = '';
+  $lines[] = 'Состав заказа:';
+  foreach ($resolved as [$v,$color,$size,$qty]) {
+    $sum = (int)$v['price'] * $qty;
+    $lines[] = '- ' . $v['name'] . ' | ' . $v['sku'] . ' | ' . $color . ' | ' . $size . ' | ' . $qty . ' шт. | ' . number_format($sum, 0, '', ' ') . ' ₽';
+  }
+  $lines[] = '';
+  $lines[] = 'Итого: ' . number_format($total, 0, '', ' ') . ' ₽';
+  $lines[] = 'Дата: ' . date('d.m.Y H:i');
+
+  $host = strtolower((string)($_SERVER['HTTP_HOST'] ?? 'odejdalike.ru'));
+  $host = preg_replace('/:\d+$/', '', $host);
+  if (!preg_match('/^[a-z0-9.-]+$/', $host)) $host = 'odejdalike.ru';
+  $from = 'noreply@' . $host;
+  $headers = [
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    'From: SWIMMER <' . $from . '>'
+  ];
+  if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)) $headers[] = 'Reply-To: ' . $email;
+
+  $subjectText = 'SWIMMER — новый заказ №' . $orderId;
+  $subject = '=?UTF-8?B?' . base64_encode($subjectText) . '?=';
+  $sent = @mail($to, $subject, implode("\r\n", $lines), implode("\r\n", $headers));
+  if (!$sent) error_log('Order #' . $orderId . ': mail() returned false');
+  return $sent;
+}
+
+function notify_order_channels($orderId, $name, $phone, $email, $comment, $resolved, $total) {
+  $emailSent = send_order_email($orderId, $name, $phone, $email, $comment, $resolved, $total);
+  // Здесь позже подключим Telegram-бота вторым каналом уведомлений.
+  return ['email_sent'=>$emailSent];
+}
+
 $input = json_decode(file_get_contents('php://input'), true);
 if (!is_array($input)) json_fail('Некорректные данные заказа.');
 if (!empty($input['website'])) json_fail('Некорректный запрос.');
@@ -90,7 +143,8 @@ try {
   }
   $pdo->commit();
 
-  echo json_encode(['ok'=>true,'order_id'=>$orderId,'total'=>$total], JSON_UNESCAPED_UNICODE);
+  $notification = notify_order_channels($orderId, $name, $phone, $email, $comment, $resolved, $total);
+  echo json_encode(['ok'=>true,'order_id'=>$orderId,'total'=>$total] + $notification, JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
   if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
   error_log($e->getMessage());
