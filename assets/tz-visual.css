@@ -1,3 +1,8 @@
+@font-face{font-family:"Inter Regular";font-style:normal;font-weight:400;font-display:swap;src:url("https://rsms.me/inter/font-files/Inter-Regular.woff2") format("woff2")}
+@font-face{font-family:"Inter Display";font-style:normal;font-weight:400;font-display:swap;src:url("https://rsms.me/inter/font-files/InterDisplay-Regular.woff2") format("woff2")}
+@font-face{font-family:"Inter Display";font-style:normal;font-weight:600;font-display:swap;src:url("https://rsms.me/inter/font-files/InterDisplay-SemiBold.woff2") format("woff2")}
+@font-face{font-family:"Inter Display";font-style:normal;font-weight:700;font-display:swap;src:url("https://rsms.me/inter/font-files/InterDisplay-Bold.woff2") format("woff2")}
+
 :root{
   --tz-fog:#ECEEEE;
   --tz-fog-2:#E4E7E7;
@@ -9,8 +14,8 @@
 }
 
 /* SWIMMER / визуальная система по ТЗ */
-body{font-family:Inter,"Inter Display",system-ui,sans-serif;color:var(--tz-ink);background:#fff;letter-spacing:-.005em}
-h1,h2,h3,.display,.card .price,.pprice,.q summary,.tech-list b{font-family:"Inter Display",Inter,system-ui,sans-serif;font-weight:600;letter-spacing:-.035em}
+body{font-family:"Inter Regular",Inter,system-ui,sans-serif;color:var(--tz-ink);background:#fff;letter-spacing:-.005em;font-weight:400}
+h1,h2,h3,.display,.card .price,.pprice,.q summary,.tech-list b{font-family:"Inter Display","Inter Regular",Inter,system-ui,sans-serif;font-weight:600;letter-spacing:-.035em}
 .wrap{max-width:1360px;padding-left:32px;padding-right:32px}
 section{padding:112px 0}
 .sec-head{margin-bottom:52px}
@@ -23,10 +28,10 @@ header{background:rgba(236,238,238,.94);backdrop-filter:blur(16px);-webkit-backd
 .menu{gap:38px;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
 .menu button,.menu a{padding:5px 0}
 .tools{gap:10px}
-.cart-open{width:42px;height:42px;padding:0;border:0;font-size:0;position:relative;display:grid;place-items:center}
-.cart-open:before{content:"";width:18px;height:15px;border:1.5px solid currentColor;border-top:0;display:block;transform:skew(-7deg);border-radius:1px}
-.cart-open:after{content:"•  •";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:3px;line-height:1}
-.cart-open #cartCount{position:absolute;right:0;top:2px;min-width:16px;height:16px;border-radius:50%;background:var(--tz-khaki);color:#fff;font-size:9px;display:grid;place-items:center;line-height:1}
+.cart-open{width:44px;height:44px;padding:0;border:0;font-size:0;position:relative;display:grid;place-items:center;background:transparent;color:var(--tz-ink);overflow:visible}
+.cart-open:before{content:"";width:24px;height:24px;display:block;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 4h2l2.2 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 7H7M10 18.8h.01M17 18.8h.01' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 4h2l2.2 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 7H7M10 18.8h.01M17 18.8h.01' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.cart-open:after{content:none;display:none}
+.cart-open #cartCount{position:absolute;right:-1px;top:1px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--tz-khaki);color:#fff;font-family:"Inter Regular",Inter,sans-serif;font-size:10px;display:grid;place-items:center;line-height:1;box-sizing:border-box}
 
 .hero{height:calc(100svh - 72px);min-height:620px;max-height:none}
 .hero-veil{background:linear-gradient(180deg,rgba(10,13,14,.08) 0%,rgba(10,13,14,.18) 38%,rgba(10,13,14,.84) 100%)}
