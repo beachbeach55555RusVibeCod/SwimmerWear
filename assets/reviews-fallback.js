@@ -82,3 +82,10 @@
   obs.observe(document.body,{childList:true,subtree:true});
   setTimeout(function(){obs.disconnect();removeBrandStory();},5000);
 })();
+
+(function(){
+  'use strict';
+  var style=document.createElement('style');
+  style.textContent='@media(max-width:900px){.hero .specs{border-top:0!important}.hero .spec{border-right:0!important;border-bottom:0!important}.hero .spec:nth-child(odd){border-right:0!important}.hero .spec:nth-last-child(-n+2){border-bottom:0!important}}';
+  document.head.appendChild(style);
+})();
