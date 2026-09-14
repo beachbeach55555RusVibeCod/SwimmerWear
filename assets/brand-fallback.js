@@ -11,6 +11,14 @@
   reviews.parentNode.insertBefore(sec,reviews.nextSibling);
 
   var style=document.createElement('style');
-  style.textContent='.brand-story{padding:96px 0 0;background:#fff;text-align:center}.brand-story__copy{max-width:980px;margin:0 auto}.brand-story__label{font-size:10px;letter-spacing:.16em;color:#777f80;margin-bottom:22px;text-align:center}.brand-story h2{margin:0 auto 36px;font-size:clamp(34px,4.5vw,58px);line-height:1;letter-spacing:-.04em;max-width:14ch;text-align:center}.brand-story__text{max-width:720px;margin:0 auto}.brand-story__text p{margin:0 0 18px;font-size:15px;line-height:1.7;color:#4e5556;text-align:center}.brand-story__link{display:inline-block;margin:8px auto 52px;font-size:14px;font-weight:600;color:#171b1c;text-decoration:underline;text-underline-offset:4px;text-align:center}.brand-story__media{width:100%;height:min(76vh,760px);overflow:hidden;background:#dfe4e4}.brand-story__media img{width:100%;height:100%;object-fit:cover;display:block;object-position:center 68%}@media(max-width:900px){.brand-story{padding-top:72px}.brand-story__media{height:58vh;min-height:420px}.brand-story__media img{object-position:center 72%}}@media(max-width:560px){.brand-story h2{max-width:12ch}.brand-story__text p{font-size:14px}.brand-story__media{height:50vh;min-height:360px}.brand-story__media img{object-position:center 74%}}';
+  style.textContent='.brand-story{padding:96px 0 0;background:#fff;text-align:center}.brand-story__copy{max-width:980px;margin:0 auto}.brand-story__label{font-size:10px;letter-spacing:.16em;color:#777f80;margin-bottom:22px;text-align:center}.brand-story h2{margin:0 auto 36px;font-size:clamp(34px,4.5vw,58px);line-height:1;letter-spacing:-.04em;max-width:14ch;text-align:center}.brand-story__text{max-width:720px;margin:0 auto}.brand-story__text p{margin:0 0 18px;font-size:15px;line-height:1.7;color:#4e5556;text-align:center}.brand-story__link{display:inline-block;margin:8px auto 52px;font-size:14px;font-weight:600;color:#171b1c;text-decoration:underline;text-underline-offset:4px;text-align:center}.brand-story__media{width:100%;height:min(76vh,760px);overflow:hidden;background:#dfe4e4}.brand-story__media img,.brand-story__media video{width:100%;height:100%;object-fit:cover;display:block;object-position:center 68%}@media(max-width:900px){.brand-story{padding-top:72px}.brand-story__media{height:58vh;min-height:420px}.brand-story__media img,.brand-story__media video{object-position:center 72%}}@media(max-width:560px){.brand-story h2{max-width:12ch}.brand-story__text p{font-size:14px}.brand-story__media{height:50vh;min-height:360px}.brand-story__media img,.brand-story__media video{object-position:center 74%}}';
   document.head.appendChild(style);
+
+  window.addEventListener('load',function(){
+    if(document.querySelector('script[data-admin-content]'))return;
+    var s=document.createElement('script');
+    s.src='/assets/admin-content.js?v=1';
+    s.setAttribute('data-admin-content','1');
+    document.body.appendChild(s);
+  },{once:true});
 })();
