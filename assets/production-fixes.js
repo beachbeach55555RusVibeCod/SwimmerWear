@@ -48,3 +48,36 @@
     renderOrderForm();checkout.style.display='none';
   },true);
 })();
+
+(function(){
+  'use strict';
+  function icon(type){
+    var shapes={
+      drop:'<path d="M12 3c3 4.2 5.5 7 5.5 10a5.5 5.5 0 1 1-11 0C6.5 10 9 7.2 12 3z"/><path d="M9.5 20.5h9"/>',
+      fabric:'<rect x="3.5" y="3.5" width="17" height="17"/><path d="M3.5 9h17M3.5 15h17M9 3.5v17M15 3.5v17"/>',
+      dwr:'<path d="M4 15.5c2.2-2.6 5-3.9 8-3.9s5.8 1.3 8 3.9"/><circle cx="8.5" cy="7" r="1.6"/><circle cx="15" cy="5.6" r="1.6"/><path d="M4 20h16"/>',
+      fleece:'<path d="M4 8.5c1.6-2 3.2-2 4.8 0s3.2 2 4.8 0 3.2-2 4.8 0"/><path d="M4 13c1.6-2 3.2-2 4.8 0s3.2 2 4.8 0 3.2-2 4.8 0"/><path d="M4 17.5c1.6-2 3.2-2 4.8 0s3.2 2 4.8 0 3.2-2 4.8 0"/>'
+    };
+    return '<svg viewBox="0 0 24 24" aria-hidden="true">'+shapes[type]+'</svg>';
+  }
+  var hero=document.querySelector('.hero .hero-in');
+  if(hero){
+    var t1=hero.querySelector('.hero-t1'); if(t1)t1.textContent='НАДЕЖНЫЕ ВЕЩИ ДЛЯ ОТДЫХА У ВОДЫ';
+    var h1=hero.querySelector('h1'); if(h1)h1.textContent='РЕЧНАЯ ПАРКА';
+    var t2=hero.querySelector('.hero-t2'); if(t2)t2.textContent='Тёплая мембранная парка-плед для дождя, ветра и холодной погоды';
+    var specs=hero.querySelector('.specs');
+    if(!specs){specs=document.createElement('div');specs.className='specs';}
+    specs.innerHTML=
+      '<div class="spec">'+icon('drop')+'<div><b>10K / 10K</b><span>водостойкость снаружи, отведение пара изнутри</span></div></div>'+ 
+      '<div class="spec">'+icon('fabric')+'<div><b>140 g/m</b><span>прочная плотная ткань</span></div></div>'+ 
+      '<div class="spec">'+icon('dwr')+'<div><b>DWR</b><span>пропитка от дождя и снега</span></div></div>'+ 
+      '<div class="spec">'+icon('fleece')+'<div><b>Wellsoft</b><span>подкладка мягкая, как плед</span></div></div>';
+    var cta=hero.querySelector('.hero-cta');
+    if(!cta){cta=document.createElement('a');cta.className='hero-cta';hero.appendChild(cta);}
+    cta.href='#product';cta.textContent='ВЫБРАТЬ';
+    if(specs.parentNode!==hero)hero.insertBefore(specs,cta); else if(specs.nextElementSibling!==cta)hero.insertBefore(specs,cta);
+  }
+  var css=document.createElement('style');
+  css.textContent='.hero-veil{background:linear-gradient(90deg,rgba(10,13,14,.72) 0%,rgba(10,13,14,.52) 36%,rgba(10,13,14,.12) 72%),linear-gradient(180deg,rgba(10,13,14,.04),rgba(10,13,14,.38))}.hero-in{padding-top:108px;padding-bottom:46px;justify-content:flex-end;align-items:flex-start}.hero-t1{font-size:11px;line-height:1.25;letter-spacing:.14em;margin-bottom:12px;max-width:300px}.hero-in h1{font-size:clamp(48px,6.6vw,88px);line-height:.92;letter-spacing:-.05em;max-width:none;margin:0;text-transform:uppercase}.hero-t2{font-size:16px;line-height:1.42;max-width:520px;margin-top:14px}.hero .specs{display:grid;grid-template-columns:repeat(4,minmax(125px,1fr));gap:22px;max-width:780px;margin-top:30px;border-top:0;padding-top:0}.hero .spec{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding-right:0;min-height:0;border-right:0}.hero .spec svg{width:24px;height:24px;stroke:rgba(255,255,255,.95);stroke-width:1.35;fill:none;margin-top:1px}.hero .spec b{display:block;font-size:14px;line-height:1.2;letter-spacing:.01em}.hero .spec span{display:block;margin-top:5px;font-size:10px;line-height:1.35;max-width:150px;color:rgba(255,255,255,.72)}.hero-cta{margin-top:26px;min-width:150px;text-align:center;padding:13px 30px;font-size:11px;letter-spacing:.14em;background:#fff;color:#171B1C;border:1px solid #fff}.hero-cta:hover{background:transparent;color:#fff}@media(max-width:900px){.hero .specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px;max-width:560px}.hero-in h1{font-size:clamp(46px,13vw,76px)}.hero-t2{font-size:15px;max-width:480px}}@media(max-width:560px){.hero-in{padding-bottom:30px}.hero .specs{margin-top:24px}.hero .spec span{font-size:9px}.hero-cta{margin-top:22px}}';
+  document.head.appendChild(css);
+})();
