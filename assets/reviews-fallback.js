@@ -45,3 +45,10 @@
   style.textContent='.footer-spec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:48px;align-items:end}.footer-spec__brand .fslogan{margin-top:14px}.footer-spec__links{display:flex;flex-direction:column;gap:10px;align-items:flex-start}.footer-spec__links a{color:inherit;text-decoration:none}.footer-spec__links a:hover{text-decoration:underline}@media(max-width:700px){.footer-spec{grid-template-columns:1fr;gap:34px}.footer-spec__links{gap:12px}}';
   document.head.appendChild(style);
 })();
+
+(function(){
+  'use strict';
+  var style=document.createElement('style');
+  style.textContent='header .bar{max-width:1360px;margin:0 auto;padding-left:32px;padding-right:32px}header .logo img{height:24px;width:auto}header .tools{justify-self:end}@media(max-width:900px){header .bar{padding-left:20px;padding-right:20px}header .logo img{height:24px}.cart-open{margin-right:0}}';
+  document.head.appendChild(style);
+})();
