@@ -74,7 +74,7 @@ function block_products($d) { ?>
   <div class="wrap">
     <div class="prod-top">
       <div>
-        <h2>Надежно снаружи. Уютно внутри</h2>
+        <h2>Надёжно снаружи.<br>Уютно внутри.</h2>
         <?php if (!empty($d['lede'])): ?><p class="lede"><?= h($d['lede']) ?></p><?php endif; ?>
       </div>
       <div class="rail-btns">
