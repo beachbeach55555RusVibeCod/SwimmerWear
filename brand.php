@@ -32,7 +32,9 @@ $isVideo = preg_match('~\.(mp4|webm)(?:\?|$)~i', $media);
     <a href="/" class="logo" aria-label="<?= h($brand) ?> — на главную"><img src="/assets/logo.svg" alt="<?= h($brand) ?>"></a>
     <nav class="menu">
       <?php foreach ($menu as $m): ?>
-        <?php if (($m['url'] ?? '') === '#brand'): ?>
+        <?php if (mb_strtolower(trim($m['title'] ?? '')) === 'главная' || in_array(($m['url'] ?? ''), ['/', '#hero'], true)): ?>
+          <a href="/#product">Каталог</a>
+        <?php elseif (($m['url'] ?? '') === '#brand'): ?>
           <a href="/brand.php" aria-current="page"><?= h($m['title']) ?></a>
         <?php elseif (($m['url'] ?? '') === '#contacts'): ?>
           <button type="button" data-brand-contacts><?= h($m['title']) ?></button>
