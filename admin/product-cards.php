@@ -89,6 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   }
 
+  if ($a === 'publish') {
+    $status = ($_POST['status'] ?? '') === 'published' ? 'published' : 'draft';
+    db()->prepare("UPDATE products SET status=? WHERE id=?")->execute([$status, $pid]);
+    $msg = $status === 'published' ? 'Товар опубликован' : 'Товар снят с публикации';
+  }
+
   if ($a === 'color_add') {
     $color = trim($_POST['color'] ?? '');
     if ($color !== '') {
@@ -227,7 +233,7 @@ $photos = $st->fetchAll();
     <input type="hidden" name="a" value="photo_upload"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>">
     <div class="row">
       <div style="flex:2"><label>Добавить фото с компьютера</label><input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple required></div>
-      <div style="flex:1"><label>Цвет этих фото</label><div class="color-radio-group"><label class="color-radio"><input type="radio" name="color" value="" checked><span class="color-radio__body">Для всех цветов</span></label><?php foreach($colors as $c): ?><label class="color-radio"><input type="radio" name="color" value="<?= h($c) ?>"><span class="color-radio__body"><span class="color-radio__dot" style="background:<?= h(color_hex($c)) ?>"></span><?= h($c) ?></span></label><?php endforeach; ?></div></div>
+      <div style="flex:1"><label>Цвет этих фото</label><select name="color"><option value="">Для всех цветов</option><?php foreach($colors as $c): ?><option value="<?= h($c) ?>"><?= h($c) ?></option><?php endforeach; ?></select></div>
       <button class="btn" style="align-self:end">Загрузить</button>
     </div>
   </form>
@@ -240,10 +246,7 @@ $photos = $st->fetchAll();
         <form method="post" class="photo-color-form">
           <input type="hidden" name="a" value="photo_color"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="photo_id" value="<?= (int)$ph['id'] ?>">
           <label>Показывать для цвета</label>
-          <div class="color-radio-group">
-            <label class="color-radio"><input type="radio" name="color" value="" <?= $ph['color']===''?'checked':'' ?> onchange="this.form.submit()"><span class="color-radio__body">Все цвета</span></label>
-            <?php foreach($colors as $c): ?><label class="color-radio"><input type="radio" name="color" value="<?= h($c) ?>" <?= $ph['color']===$c?'checked':'' ?> onchange="this.form.submit()"><span class="color-radio__body"><span class="color-radio__dot" style="background:<?= h(color_hex($c)) ?>"></span><?= h($c) ?></span></label><?php endforeach; ?>
-          </div>
+          <select name="color" onchange="this.form.submit()"><option value="">Все цвета</option><?php foreach($colors as $c): ?><option value="<?= h($c) ?>" <?= $ph['color']===$c?'selected':'' ?>><?= h($c) ?></option><?php endforeach; ?></select>
         </form>
         <div class="row" style="gap:5px"><form method="post"><input type="hidden" name="a" value="photo_move"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="photo_id" value="<?= (int)$ph['id'] ?>"><input type="hidden" name="dir" value="up"><button class="btn sm grey">←</button></form><form method="post"><input type="hidden" name="a" value="photo_move"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="photo_id" value="<?= (int)$ph['id'] ?>"><input type="hidden" name="dir" value="down"><button class="btn sm grey">→</button></form><form method="post" onsubmit="return confirm('Удалить фото из карточки?')"><input type="hidden" name="a" value="photo_del"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="photo_id" value="<?= (int)$ph['id'] ?>"><button class="btn sm red">Удалить</button></form></div>
       </div>
@@ -254,6 +257,6 @@ $photos = $st->fetchAll();
 </div>
 <a class="btn grey" href="product-cards.php">← К списку товаров</a>
 <?php else: ?>
-<div class="panel"><table><tr><th>Товар</th><th>Артикул</th><th>Цена</th><th>Статус</th><th></th></tr><?php foreach($list as $p): ?><tr><td><?= h($p['name']) ?></td><td><?= h($p['sku']) ?></td><td><?= number_format($p['price'],0,'',' ') ?> ₽</td><td><?= $p['status']==='published'?'Опубликован':'Черновик' ?></td><td><a class="btn sm" href="?edit=<?= (int)$p['id'] ?>">Редактировать</a></td></tr><?php endforeach; ?></table></div>
+<div class="panel"><table><tr><th>Товар</th><th>Артикул</th><th>Цена</th><th>Статус</th><th></th></tr><?php foreach($list as $p): ?><tr><td><?= h($p['name']) ?></td><td><?= h($p['sku']) ?></td><td><?= number_format($p['price'],0,'',' ') ?> ₽</td><td><?= $p['status']==='published'?'Опубликован':'Черновик' ?></td><td><div class="row" style="gap:7px;flex-wrap:wrap"><a class="btn sm" href="?edit=<?= (int)$p['id'] ?>">Редактировать</a><form method="post"><input type="hidden" name="a" value="publish"><input type="hidden" name="pid" value="<?= (int)$p['id'] ?>"><input type="hidden" name="status" value="<?= $p['status']==='published'?'draft':'published' ?>"><button class="btn sm <?= $p['status']==='published'?'grey':'' ?>" type="submit"><?= $p['status']==='published'?'Снять с публикации':'Опубликовать' ?></button></form></div></td></tr><?php endforeach; ?></table></div>
 <div class="panel"><h2 style="margin-top:0">Добавить товар</h2><form method="post" class="row"><input type="hidden" name="a" value="new"><div style="flex:2"><label>Название</label><input name="name" value="<?= h($newName) ?>" required></div><div style="flex:1"><label>Артикул</label><input name="sku" value="<?= h($newSku) ?>" required><div class="tag" style="margin-top:5px">Артикул должен быть уникальным для каждого товара.</div></div><div style="width:150px"><label>Цена, ₽</label><input type="number" name="price" value="<?= (int)$newPrice ?>"></div><button class="btn" style="align-self:end">Создать</button></form></div>
 <?php endif; foot();
