@@ -79,6 +79,7 @@ foreach ($prods as $p) {
     if (!isset($seenSize[$v['size']])) { $seenSize[$v['size']] = 1; $SW['sizes'][] = $v['size']; }
   }
   if (!$byColor) $byColor['—'] = ['name'=>'—','sizes'=>[]];
+  $onlyOneColor = count($byColor) === 1;
 
   foreach ($byColor as $key => $c) {
     if (!isset($seenColor[$key])) {
@@ -86,9 +87,11 @@ foreach ($prods as $p) {
       $SW['colors'][] = ['id'=>$key, 'name'=>$c['name'], 'hex'=>$colorHex[$key] ?? '#7E8688'];
     }
     $shots = [];
-    foreach ($shotsAll as $s)
-      if ($s['color'] === null || $s['color'] === '' || lc($s['color']) === $key)
+    foreach ($shotsAll as $s) {
+      $shotColor = trim((string)($s['color'] ?? ''));
+      if (($shotColor !== '' && lc($shotColor) === $key) || ($shotColor === '' && $onlyOneColor))
         $shots[] = media_url($s['file']);
+    }
     if (!$shots) $shots[] = placeholder_src($p['name'] . ' · ' . $c['name']);
 
     $SW['products'][] = [
@@ -226,6 +229,7 @@ if (!$blocks) echo '<section><div class="wrap"><h1>' . h($page['title']) . '</h1
 
 <script>window.SW = <?= json_encode($SW, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
 <script src="/assets/app.js"></script>
+<script src="/assets/product-color-scope-fix.js?v=1"></script>
 <script src="/assets/tech-fallback.js"></script>
 <script src="/assets/build-fallback.js"></script>
 <script src="/assets/reviews-fallback.js?v=6"></script>
