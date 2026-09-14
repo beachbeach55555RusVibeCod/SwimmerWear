@@ -1,6 +1,11 @@
 <?php
 require dirname(__DIR__) . '/config.php';
 
+if (basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH)) === 'visuals.php') {
+  need_auth();
+  require __DIR__ . '/ensure-media-blocks.php';
+}
+
 function head($title) { ?>
 <!doctype html><html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
