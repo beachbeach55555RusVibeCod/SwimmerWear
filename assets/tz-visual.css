@@ -170,11 +170,11 @@ footer a,footer button{font-size:13px;padding:4px 0}
   .mbody{padding:22px 20px}
 }
 
-/* Хэдер: логотип и корзина смещены вправо */
-header .bar{max-width:none;width:100%;padding-left:40px;padding-right:8px;box-sizing:border-box}
+/* Хэдер: возвращаем логотип и корзину в общий контейнер сайта */
+header .bar{max-width:1360px;width:100%;margin-left:auto;margin-right:auto;padding-left:32px;padding-right:32px;box-sizing:border-box}
 header .logo img{height:24px;width:auto}
 header .tools{justify-self:end}
 @media(max-width:900px){
-  header .bar{padding-left:24px;padding-right:6px}
+  header .bar{padding-left:20px;padding-right:20px}
   header .logo img{height:24px}
 }
