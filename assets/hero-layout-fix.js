@@ -21,3 +21,23 @@
   else setTimeout(applyHeroLayout,0);
   window.addEventListener('load',applyHeroLayout,{once:true});
 })();
+
+(function(){
+  'use strict';
+  function baseProductId(id){
+    var value=String(id==null?'':id);
+    var cut=value.indexOf('-');
+    return cut===-1?value:value.slice(0,cut);
+  }
+
+  window.productByColor=function(_name,colorId){
+    var products=window.PRODUCTS||[];
+    var selected=window.sel&&window.sel.productId!=null?window.sel.productId:'';
+    var base=baseProductId(selected);
+    for(var i=0;i<products.length;i++){
+      var p=products[i];
+      if(baseProductId(p.id)===base && p.colorId===colorId)return p;
+    }
+    return null;
+  };
+})();
