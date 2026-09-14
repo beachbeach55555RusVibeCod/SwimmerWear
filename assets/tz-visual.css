@@ -53,7 +53,7 @@ header{background:#ECEEEE;border-bottom:1px solid rgba(23,27,28,.12);box-shadow:
 
 .products{background:var(--tz-fog)}
 .prod-top{align-items:end;margin-bottom:46px}
-.products .prod-top h2{max-width:12ch}
+.products .prod-top h2{max-width:520px;width:auto;white-space:normal}
 .rail-btns button,.build-nav button{width:46px;height:46px;background:transparent;border:1px solid #BFC5C5}
 .rail-btns button:hover,.build-nav button:hover{background:var(--tz-ink);color:#fff;border-color:var(--tz-ink)}
 .rail{grid-auto-columns:calc((100% - 48px)/3);gap:24px;padding-bottom:10px}
