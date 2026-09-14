@@ -1,6 +1,9 @@
 (function(){
   'use strict';
-  if(document.querySelector('.build')) return;
+  if(document.querySelector('.build-showcase')) return;
+
+  var oldBuild=document.querySelector('.build');
+  if(oldBuild) oldBuild.remove();
 
   var anchor=document.getElementById('tech') || document.getElementById('scenarios');
   if(!anchor || !anchor.parentNode) return;
