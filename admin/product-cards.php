@@ -1,0 +1,161 @@
+<?php
+require 'inc.php';
+require dirname(__DIR__) . '/inc/blocks.php';
+need_auth();
+$msg = '';
+
+function product_colors($pid) {
+  $st = db()->prepare("SELECT DISTINCT color FROM variants WHERE product_id=? AND color<>'' ORDER BY color");
+  $st->execute([$pid]);
+  return array_values(array_filter($st->fetchAll(PDO::FETCH_COLUMN)));
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $a = $_POST['a'] ?? '';
+  $pid = (int)($_POST['pid'] ?? $_POST['id'] ?? 0);
+
+  if ($a === 'new') {
+    db()->prepare("INSERT INTO products (sku,name,price,status,sort) VALUES (?,?,?,'draft',0)")
+      ->execute([trim($_POST['sku']), trim($_POST['name']), (int)$_POST['price']]);
+    $pid = (int)db()->lastInsertId();
+    header('Location: product-cards.php?edit='.$pid); exit;
+  }
+
+  if ($a === 'save') {
+    db()->prepare("UPDATE products SET sku=?,name=?,price=?,status=? WHERE id=?")
+      ->execute([trim($_POST['sku']), trim($_POST['name']), (int)$_POST['price'], $_POST['status']==='published'?'published':'draft', $pid]);
+    $msg = 'Карточка сохранена';
+  }
+
+  if ($a === 'color_add') {
+    $color = trim($_POST['color'] ?? '');
+    if ($color !== '') {
+      foreach (['XS','S','M','L','XL'] as $size) {
+        db()->prepare("INSERT INTO variants (product_id,color,size,stock) VALUES (?,?,?,0) ON DUPLICATE KEY UPDATE color=VALUES(color)")
+          ->execute([$pid,$color,$size]);
+      }
+      $msg = 'Цвет добавлен';
+    }
+  }
+
+  if ($a === 'color_del') {
+    $color = trim($_POST['color'] ?? '');
+    db()->prepare("DELETE FROM variants WHERE product_id=? AND color=?")->execute([$pid,$color]);
+    $msg = 'Цвет удалён';
+  }
+
+  if ($a === 'photo_color') {
+    db()->prepare("UPDATE product_media SET color=? WHERE id=? AND product_id=?")
+      ->execute([trim($_POST['color'] ?? ''),(int)$_POST['photo_id'],$pid]);
+    $msg = 'Цвет фотографии сохранён';
+  }
+
+  if ($a === 'photo_del') {
+    $id=(int)$_POST['photo_id'];
+    $st=db()->prepare("SELECT pm.media_id,m.file FROM product_media pm JOIN media m ON m.id=pm.media_id WHERE pm.id=? AND pm.product_id=?");
+    $st->execute([$id,$pid]); $row=$st->fetch();
+    if ($row) {
+      db()->prepare("DELETE FROM product_media WHERE id=?")->execute([$id]);
+      $used=db()->prepare("SELECT COUNT(*) FROM product_media WHERE media_id=?"); $used->execute([$row['media_id']]);
+      if (!(int)$used->fetchColumn()) {
+        if (!preg_match('~^https?://~i',$row['file'])) @unlink(UPLOAD_DIR.'/'.$row['file']);
+        db()->prepare("DELETE FROM media WHERE id=?")->execute([$row['media_id']]);
+      }
+    }
+    $msg='Фото удалено';
+  }
+
+  if ($a === 'photo_move') {
+    $id=(int)$_POST['photo_id']; $dir=$_POST['dir'] ?? 'up';
+    $st=db()->prepare("SELECT id,sort FROM product_media WHERE id=? AND product_id=?"); $st->execute([$id,$pid]); $cur=$st->fetch();
+    if ($cur) {
+      $op=$dir==='up'?'<':'>'; $ord=$dir==='up'?'DESC':'ASC';
+      $st=db()->prepare("SELECT id,sort FROM product_media WHERE product_id=? AND sort $op ? ORDER BY sort $ord LIMIT 1");
+      $st->execute([$pid,$cur['sort']]);
+      if ($nb=$st->fetch()) {
+        db()->prepare("UPDATE product_media SET sort=? WHERE id=?")->execute([$nb['sort'],$cur['id']]);
+        db()->prepare("UPDATE product_media SET sort=? WHERE id=?")->execute([$cur['sort'],$nb['id']]);
+      }
+    }
+  }
+
+  if ($a === 'photo_upload' && !empty($_FILES['photos']['tmp_name'][0])) {
+    if (!is_dir(UPLOAD_DIR)) @mkdir(UPLOAD_DIR,0755,true);
+    $color=trim($_POST['color'] ?? '');
+    $st=db()->prepare("SELECT COALESCE(MAX(sort),-1) FROM product_media WHERE product_id=?"); $st->execute([$pid]); $sort=(int)$st->fetchColumn();
+    $ok=0;
+    foreach ($_FILES['photos']['tmp_name'] as $i=>$tmp) {
+      if (!is_uploaded_file($tmp)) continue;
+      $orig=$_FILES['photos']['name'][$i]; $ext=strtolower(pathinfo($orig,PATHINFO_EXTENSION));
+      if (!in_array($ext,['jpg','jpeg','png','webp'])) continue;
+      $name=date('Ymd_His').'_'.bin2hex(random_bytes(3)).'.'.$ext;
+      if (move_uploaded_file($tmp,UPLOAD_DIR.'/'.$name)) {
+        @chmod(UPLOAD_DIR.'/'.$name,0644);
+        db()->prepare("INSERT INTO media (file,alt,mime,filesize) VALUES (?,?,?,?)")
+          ->execute([$name,pathinfo($orig,PATHINFO_FILENAME),$_FILES['photos']['type'][$i],$_FILES['photos']['size'][$i]]);
+        $mid=(int)db()->lastInsertId();
+        db()->prepare("INSERT INTO product_media (product_id,media_id,color,sort) VALUES (?,?,?,?)")
+          ->execute([$pid,$mid,$color,++$sort]);
+        $ok++;
+      }
+    }
+    $msg='Добавлено фото: '.$ok;
+  }
+}
+
+$edit=null;
+if (!empty($_GET['edit'])) { $st=db()->prepare("SELECT * FROM products WHERE id=?"); $st->execute([(int)$_GET['edit']]); $edit=$st->fetch(); }
+$list=db()->query("SELECT * FROM products ORDER BY sort,id")->fetchAll();
+head('Карточки товара');
+?>
+<h1>Карточки товара</h1>
+<p class="tag" style="margin:-8px 0 22px">Здесь только товар, его цвета и фотографии. Фото, которому назначен цвет, показывается на сайте при выборе этого цвета.</p>
+<?php if($msg): ?><div class="msg"><?= h($msg) ?></div><?php endif; ?>
+
+<?php if($edit): $colors=product_colors($edit['id']); ?>
+<div class="panel">
+  <h2 style="margin-top:0">Основное</h2>
+  <form method="post">
+    <input type="hidden" name="a" value="save"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>">
+    <div class="row"><div style="flex:2"><label>Название</label><input name="name" value="<?= h($edit['name']) ?>" required></div><div style="flex:1"><label>Артикул</label><input name="sku" value="<?= h($edit['sku']) ?>" required></div></div>
+    <div class="row"><div style="width:180px"><label>Цена, ₽</label><input type="number" name="price" value="<?= (int)$edit['price'] ?>"></div><div style="width:220px"><label>Статус</label><select name="status"><option value="draft" <?= $edit['status']==='draft'?'selected':'' ?>>Черновик</option><option value="published" <?= $edit['status']==='published'?'selected':'' ?>>Опубликован</option></select></div></div>
+    <button class="btn">Сохранить карточку</button>
+  </form>
+</div>
+
+<div class="panel">
+  <h2 style="margin-top:0">Цвета товара</h2>
+  <p class="tag">Добавленный здесь цвет появится в выборе цвета на сайте.</p>
+  <div class="row" style="gap:8px;flex-wrap:wrap;margin:12px 0 18px">
+    <?php foreach($colors as $c): ?><form method="post" onsubmit="return confirm('Удалить цвет <?= h($c) ?>?')"><input type="hidden" name="a" value="color_del"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="color" value="<?= h($c) ?>"><button class="btn grey"><?= h($c) ?> ×</button></form><?php endforeach; ?>
+    <?php if(!$colors): ?><span class="tag">Цветов пока нет</span><?php endif; ?>
+  </div>
+  <form method="post" class="row"><input type="hidden" name="a" value="color_add"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><div style="flex:1"><label>Новый цвет</label><input name="color" placeholder="например: хаки" required></div><button class="btn" style="align-self:end">Добавить цвет</button></form>
+</div>
+
+<?php $st=db()->prepare("SELECT pm.*,m.file,m.alt FROM product_media pm JOIN media m ON m.id=pm.media_id WHERE pm.product_id=? ORDER BY pm.sort,pm.id"); $st->execute([$edit['id']]); $photos=$st->fetchAll(); ?>
+<div class="panel">
+  <h2 style="margin-top:0">Фотографии</h2>
+  <form method="post" enctype="multipart/form-data" style="padding:16px;background:#f3f4f4;margin-bottom:22px">
+    <input type="hidden" name="a" value="photo_upload"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>">
+    <div class="row"><div style="flex:2"><label>Добавить фото с компьютера</label><input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple required></div><div style="flex:1"><label>Цвет этих фото</label><select name="color"><option value="">Для всех цветов</option><?php foreach($colors as $c): ?><option value="<?= h($c) ?>"><?= h($c) ?></option><?php endforeach; ?></select></div><button class="btn" style="align-self:end">Загрузить</button></div>
+  </form>
+
+  <div class="thumbs">
+    <?php foreach($photos as $ph): ?>
+    <div class="thumb" style="min-width:180px">
+      <img src="<?= h(media_url($ph['file'])) ?>" alt="" loading="lazy">
+      <div class="n">
+        <form method="post" style="margin-bottom:8px"><input type="hidden" name="a" value="photo_color"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="photo_id" value="<?= (int)$ph['id'] ?>"><label>Показывать для цвета</label><select name="color" onchange="this.form.submit()"><option value="">Все цвета</option><?php foreach($colors as $c): ?><option value="<?= h($c) ?>" <?= $ph['color']===$c?'selected':'' ?>><?= h($c) ?></option><?php endforeach; ?></select></form>
+        <div class="row" style="gap:5px"><form method="post"><input type="hidden" name="a" value="photo_move"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="photo_id" value="<?= (int)$ph['id'] ?>"><input type="hidden" name="dir" value="up"><button class="btn sm grey">←</button></form><form method="post"><input type="hidden" name="a" value="photo_move"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="photo_id" value="<?= (int)$ph['id'] ?>"><input type="hidden" name="dir" value="down"><button class="btn sm grey">→</button></form><form method="post" onsubmit="return confirm('Удалить фото из карточки?')"><input type="hidden" name="a" value="photo_del"><input type="hidden" name="pid" value="<?= (int)$edit['id'] ?>"><input type="hidden" name="photo_id" value="<?= (int)$ph['id'] ?>"><button class="btn sm red">Удалить</button></form></div>
+      </div>
+    </div>
+    <?php endforeach; ?>
+  </div>
+  <?php if(!$photos): ?><p class="tag">Фото пока нет</p><?php endif; ?>
+</div>
+<a class="btn grey" href="product-cards.php">← К списку товаров</a>
+<?php else: ?>
+<div class="panel"><table><tr><th>Товар</th><th>Артикул</th><th>Цена</th><th>Статус</th><th></th></tr><?php foreach($list as $p): ?><tr><td><?= h($p['name']) ?></td><td><?= h($p['sku']) ?></td><td><?= number_format($p['price'],0,'',' ') ?> ₽</td><td><?= $p['status']==='published'?'Опубликован':'Черновик' ?></td><td><a class="btn sm" href="?edit=<?= (int)$p['id'] ?>">Редактировать</a></td></tr><?php endforeach; ?></table></div>
+<div class="panel"><h2 style="margin-top:0">Добавить товар</h2><form method="post" class="row"><input type="hidden" name="a" value="new"><div style="flex:2"><label>Название</label><input name="name" required></div><div style="flex:1"><label>Артикул</label><input name="sku" required></div><div style="width:150px"><label>Цена, ₽</label><input type="number" name="price" value="0"></div><button class="btn" style="align-self:end">Создать</button></form></div>
+<?php endif; foot();
