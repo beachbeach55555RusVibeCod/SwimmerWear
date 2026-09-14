@@ -89,3 +89,23 @@
   style.textContent='@media(max-width:900px){.hero .specs{border-top:0!important}.hero .spec{border-right:0!important;border-bottom:0!important}.hero .spec:nth-child(odd){border-right:0!important}.hero .spec:nth-last-child(-n+2){border-bottom:0!important}}';
   document.head.appendChild(style);
 })();
+
+(function(){
+  'use strict';
+  function openContacts(){
+    if(typeof window.openSheet==='function'){window.openSheet('contacts');return;}
+    var modal=document.getElementById('mContacts'),ov=document.getElementById('ov');
+    if(!modal)return;
+    modal.classList.add('on');
+    if(ov)ov.classList.add('on');
+    document.body.classList.add('lock');
+  }
+  document.addEventListener('click',function(e){
+    var el=e.target.closest?e.target.closest('header .menu a,header .menu button,#mobileMenu a,#mobileMenu button'):null;
+    if(!el)return;
+    if((el.textContent||'').trim().toLowerCase()!=='контакты')return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    openContacts();
+  },true);
+})();
