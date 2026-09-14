@@ -12,4 +12,9 @@
     link.className=brandButton.className || '';
     brandButton.replaceWith(link);
   }
+
+  window.addEventListener('load',function(){
+    var t1=document.querySelector('.hero .hero-t1');
+    if(t1)t1.innerHTML='НАДЕЖНЫЕ ВЕЩИ<br>ДЛЯ ОТДЫХА У ВОДЫ';
+  });
 })();
