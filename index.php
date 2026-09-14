@@ -24,7 +24,6 @@ if (!$page) {
   $blocks = $st->fetchAll();
 }
 
-/* ---------- данные для витрины (уходят в JS) ---------- */
 $SW = ['hero'=>[], 'colors'=>[], 'sizes'=>[], 'products'=>[], 'scenarios'=>[], 'details'=>[],
        'modelNote'=>setting('model_note',''), 'pdesc'=>['tags'=>[]]];
 
@@ -53,7 +52,6 @@ foreach ($blocks as $b) {
   }
 }
 
-/* товары, цвета и размеры — из БД */
 $prods = db()->query("SELECT * FROM products WHERE status='published' ORDER BY sort, id")->fetchAll();
 $colorHex = [];
 foreach (preg_split('/\n+/', setting('colors', "хаки|#575E43\nчёрный|#22262A\nсиний|#41546B")) as $line) {
@@ -87,7 +85,6 @@ foreach ($prods as $p) {
       $seenColor[$key] = 1;
       $SW['colors'][] = ['id'=>$key, 'name'=>$c['name'], 'hex'=>$colorHex[$key] ?? '#7E8688'];
     }
-    /* app.js ждёт здесь простые ссылки, не объекты */
     $shots = [];
     foreach ($shotsAll as $s)
       if ($s['color'] === null || $s['color'] === '' || lc($s['color']) === $key)
@@ -150,33 +147,21 @@ if (!$blocks) echo '<section><div class="wrap"><h1>' . h($page['title']) . '</h1
     <div class="fgrid">
       <div>
         <img class="fbrand" src="/assets/logo-white.svg" alt="<?= h($brand) ?>">
-        <p class="fslogan"><?= h(setting('slogan', '')) ?></p>
+        <p class="fslogan">Увидимся у воды.</p>
       </div>
-      <div>
-        <h4>РАЗДЕЛЫ</h4>
-        <?php foreach ($fmenu as $m): ?>
-          <?php if (in_array($m['url'], ['#brand','#contacts'], true)): ?>
-            <button data-open="<?= ltrim(h($m['url']), '#') ?>"><?= h($m['title']) ?></button>
-          <?php else: ?>
-            <a href="<?= h($m['url']) ?>"><?= h($m['title']) ?></a>
-          <?php endif; ?>
-        <?php endforeach; ?>
-      </div>
-      <div>
-        <h4>КОНТАКТЫ</h4>
-        <?php if (setting('phone')): ?><a href="tel:<?= h(preg_replace('/[^+\d]/', '', setting('phone'))) ?>"><?= h(setting('phone')) ?></a><?php endif; ?>
-        <?php if (setting('email')): ?><a href="mailto:<?= h(setting('email')) ?>"><?= h(setting('email')) ?></a><?php endif; ?>
-        <button data-open="contacts">Все контакты</button>
+      <div class="footer-legal">
+        <a href="#offer">Публичная оферта</a>
+        <a href="#payment">Способы оплаты</a>
+        <a href="#returns">Гарантия и возврат</a>
       </div>
     </div>
     <div class="fbot">
       <span>&copy; <?= date('Y') ?> <?= h($brand) ?></span>
-      <span><?= h(setting('tagline', '')) ?></span>
+      <span>Увидимся у воды.</span>
     </div>
   </div>
 </footer>
 
-<!-- модалки -->
 <div class="ov" id="ov"></div>
 
 <div class="sheet modal" id="mProduct" role="dialog" aria-modal="true" aria-label="Карточка товара">
@@ -225,11 +210,6 @@ if (!$blocks) echo '<section><div class="wrap"><h1>' . h($page['title']) . '</h1
       <?php if (setting('phone')): ?><div><b>ТЕЛЕФОН</b><a href="tel:<?= h(preg_replace('/[^+\d]/', '', setting('phone'))) ?>"><?= h(setting('phone')) ?></a></div><?php endif; ?>
       <?php if (setting('email')): ?><div><b>E-MAIL</b><a href="mailto:<?= h(setting('email')) ?>"><?= h(setting('email')) ?></a></div><?php endif; ?>
       <?php if (setting('tg')): ?><div><b>TELEGRAM</b><a href="<?= h(setting('tg')) ?>"><?= h(setting('tg')) ?></a></div><?php endif; ?>
-      <?php if ($fmenu): ?>
-      <div><b>РАЗДЕЛЫ</b>
-        <?php foreach ($fmenu as $m): ?><a href="<?= h($m['url']) ?>" data-close><?= h($m['title']) ?></a><?php endforeach; ?>
-      </div>
-      <?php endif; ?>
     </div>
   </div>
 </div>
