@@ -75,3 +75,12 @@
     .then(render)
     .catch(function(){});
 })();
+
+(function(){
+  'use strict';
+  var oldBody=document.getElementById('pBody');
+  if(!oldBody || oldBody.dataset.extraSizesReady==='1')return;
+  var fresh=oldBody.cloneNode(true);
+  fresh.dataset.extraSizesReady='1';
+  oldBody.parentNode.replaceChild(fresh,oldBody);
+})();
