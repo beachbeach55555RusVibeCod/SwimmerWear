@@ -39,10 +39,10 @@
   if(!footer)return;
   var wrap=footer.querySelector('.wrap');
   if(!wrap)return;
-  wrap.innerHTML='<div class="footer-spec"><div class="footer-spec__brand"><img class="fbrand" src="/assets/logo-white.svg" alt="SWIMMER"><p class="fslogan">Увидимся у воды.</p></div><nav class="footer-spec__links" aria-label="Информация"><a href="#" data-footer-placeholder>Публичная оферта</a><a href="#" data-footer-placeholder>Способы оплаты</a><a href="#" data-footer-placeholder>Гарантия и возврат</a></nav></div>';
+  wrap.innerHTML='<div class="footer-spec"><div class="footer-spec__brand"><img class="fbrand" src="/assets/logo-white.svg" alt="SWIMMER"><p class="fslogan">Увидимся у воды.</p></div><nav class="footer-spec__links" aria-label="Информация"><a href="#" data-footer-placeholder>Публичная оферта</a><a href="#" data-footer-placeholder>Способы оплаты</a><a href="#" data-footer-placeholder>Гарантия и возврат</a></nav><div class="footer-spec__contacts"><button type="button" data-open="contacts">Контакты</button></div></div>';
   footer.addEventListener('click',function(e){var a=e.target.closest('[data-footer-placeholder]');if(a)e.preventDefault();});
   var style=document.createElement('style');
-  style.textContent='.footer-spec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:48px;align-items:end}.footer-spec__brand .fslogan{margin-top:14px}.footer-spec__links{display:flex;flex-direction:column;gap:10px;align-items:flex-start}.footer-spec__links a{color:inherit;text-decoration:none}.footer-spec__links a:hover{text-decoration:underline}@media(max-width:700px){.footer-spec{grid-template-columns:1fr;gap:34px}.footer-spec__links{gap:12px}}';
+  style.textContent='.footer-spec{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:48px;align-items:end}.footer-spec__brand .fslogan{margin-top:14px}.footer-spec__links{display:flex;flex-direction:column;gap:10px;align-items:flex-start}.footer-spec__links a{color:inherit;text-decoration:none}.footer-spec__links a:hover{text-decoration:underline}.footer-spec__contacts button{color:inherit;background:none;border:0;padding:4px 0;font:inherit;cursor:pointer}.footer-spec__contacts button:hover{text-decoration:underline}@media(max-width:700px){.footer-spec{grid-template-columns:1fr;gap:34px}.footer-spec__links{gap:12px}}';
   document.head.appendChild(style);
 })();
 
