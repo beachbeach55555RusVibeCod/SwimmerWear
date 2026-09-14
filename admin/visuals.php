@@ -20,33 +20,52 @@ function v_rows($key, $fields) {
 function v_setting($k, $v) {
   db()->prepare("INSERT INTO settings (`k`,`v`) VALUES (?,?) ON DUPLICATE KEY UPDATE `v`=VALUES(`v`)")->execute([$k,$v]);
 }
+function v_upload_error_text($code) {
+  $map = [
+    UPLOAD_ERR_INI_SIZE=>'Файл больше лимита сервера upload_max_filesize.',
+    UPLOAD_ERR_FORM_SIZE=>'Файл больше разрешённого размера формы.',
+    UPLOAD_ERR_PARTIAL=>'Файл загрузился не полностью.',
+    UPLOAD_ERR_NO_TMP_DIR=>'На сервере нет временной папки для загрузки.',
+    UPLOAD_ERR_CANT_WRITE=>'Сервер не смог записать файл на диск.',
+    UPLOAD_ERR_EXTENSION=>'Загрузка остановлена расширением PHP.',
+  ];
+  return $map[$code] ?? 'Неизвестная ошибка загрузки (код '.$code.').';
+}
 function v_apply_uploads() {
-  if (empty($_FILES['upload']['tmp_name']) || !is_array($_FILES['upload']['tmp_name'])) return;
-  if (!is_dir(UPLOAD_DIR)) @mkdir(UPLOAD_DIR, 0755, true);
+  $messages = [];
+  if (empty($_FILES['upload']['name']) || !is_array($_FILES['upload']['name'])) return $messages;
+  if (!is_dir(UPLOAD_DIR) && !@mkdir(UPLOAD_DIR, 0755, true)) return ['Не удалось создать папку uploads.'];
+  if (!is_writable(UPLOAD_DIR)) return ['Папка uploads недоступна для записи.'];
   $allowed = ['jpg','jpeg','png','webp','gif','svg','mp4','webm'];
-  foreach ($_FILES['upload']['tmp_name'] as $key => $rows) {
+  foreach ($_FILES['upload']['name'] as $key => $rows) {
     if (!is_array($rows)) continue;
-    foreach ($rows as $i => $tmp) {
-      if (!$tmp || !is_uploaded_file($tmp)) continue;
-      $orig = $_FILES['upload']['name'][$key][$i] ?? 'file';
+    foreach ($rows as $i => $orig) {
+      if (!$orig) continue;
+      $error = (int)($_FILES['upload']['error'][$key][$i] ?? UPLOAD_ERR_NO_FILE);
+      if ($error === UPLOAD_ERR_NO_FILE) continue;
+      if ($error !== UPLOAD_ERR_OK) { $messages[] = h($orig).': '.v_upload_error_text($error); continue; }
+      $tmp = $_FILES['upload']['tmp_name'][$key][$i] ?? '';
+      if (!$tmp || !is_uploaded_file($tmp)) { $messages[] = h($orig).': сервер не получил временный файл.'; continue; }
       $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
-      if (!in_array($ext, $allowed, true)) continue;
+      if (!in_array($ext, $allowed, true)) { $messages[] = h($orig).': формат не поддерживается.'; continue; }
       $name = date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-      if (!move_uploaded_file($tmp, UPLOAD_DIR . '/' . $name)) continue;
+      if (!move_uploaded_file($tmp, UPLOAD_DIR . '/' . $name)) { $messages[] = h($orig).': не удалось сохранить файл.'; continue; }
       @chmod(UPLOAD_DIR . '/' . $name, 0644);
       $mime = $_FILES['upload']['type'][$key][$i] ?? '';
       $size = (int)($_FILES['upload']['size'][$key][$i] ?? 0);
       db()->prepare("INSERT INTO media (file,alt,mime,filesize) VALUES (?,?,?,?)")
         ->execute([$name, pathinfo($orig, PATHINFO_FILENAME), $mime, $size]);
       $_POST[$key]['src'][$i] = media_url($name);
+      $messages[] = h($orig).': загружен.';
     }
   }
+  return $messages;
 }
 function v_media_field($key, $i, $src, $label, $title = 'Медиа') {
   $src = (string)$src; $label = (string)$label;
   $isVideo = preg_match('~\.(mp4|webm)(?:\?|$)~i', $src);
   ?>
-  <div class="visual-media">
+  <div class="visual-media" data-original-src="<?= h($src) ?>">
     <div class="visual-preview">
       <?php if ($src): ?>
         <?php if ($isVideo): ?><video src="<?= h($src) ?>" muted controls preload="metadata"></video>
@@ -55,10 +74,13 @@ function v_media_field($key, $i, $src, $label, $title = 'Медиа') {
     </div>
     <div class="visual-fields">
       <label><?= h($title) ?></label>
-      <input class="visual-file" type="file" name="upload[<?= h($key) ?>][<?= $i ?>]" accept="image/*,video/mp4,video/webm">
-      <div class="visual-file-hint">Выбери фото или видео с компьютера. После сохранения новый файл заменит текущий.</div>
+      <div class="visual-upload-row">
+        <input class="visual-file" type="file" name="upload[<?= h($key) ?>][<?= $i ?>]" accept="image/*,video/mp4,video/webm">
+        <button class="btn grey sm visual-cancel" type="button">Отмена</button>
+      </div>
+      <div class="visual-file-hint">Выбери фото или видео с компьютера. Затем нажми кнопку сохранения блока.</div>
       <label>Или ссылка / файл из медиатеки</label>
-      <input name="<?= h($key) ?>[src][<?= $i ?>]" value="<?= h($src) ?>" list="visual-media-list" placeholder="/uploads/... или https://...">
+      <input class="visual-src" name="<?= h($key) ?>[src][<?= $i ?>]" value="<?= h($src) ?>" list="visual-media-list" placeholder="/uploads/... или https://...">
       <label>Надпись / подпись</label>
       <input name="<?= h($key) ?>[label][<?= $i ?>]" value="<?= h($label) ?>" placeholder="Текст для этого кадра">
     </div>
@@ -74,7 +96,7 @@ if (!$pageId && $pages) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  v_apply_uploads();
+  $uploadMessages = v_apply_uploads();
   $action = $_POST['a'] ?? '';
   if ($action === 'save_block') {
     $id = (int)($_POST['id'] ?? 0);
@@ -107,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     v_setting('brand_story_media_label', $media['label']);
     $msg = 'Блок «О бренде» сохранён';
   }
+  if ($uploadMessages) $msg .= ($msg ? ' ' : '') . implode(' ', $uploadMessages);
 }
 
 $st = db()->prepare("SELECT * FROM blocks WHERE page_id=? ORDER BY sort,id"); $st->execute([$pageId]); $blocks=$st->fetchAll();
@@ -124,10 +147,10 @@ $brand = [
 head('Фото, видео и надписи'); ?>
 <style>
 .visual-media{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;padding:16px 0;border-top:1px solid var(--line)}
-.visual-preview{height:130px;background:#eef0f0;overflow:hidden;display:grid;place-items:center}.visual-preview img,.visual-preview video{width:100%;height:100%;object-fit:cover}.visual-empty{font-size:12px;color:#8a9293}.visual-fields label{margin-top:0}.visual-fields input{margin-bottom:8px}.visual-file{padding:9px!important;background:#fff;border:1px solid var(--line)}.visual-file-hint{font-size:11px;color:#7e8688;margin:-2px 0 10px}.visual-section-title{display:flex;align-items:center;gap:10px;margin-bottom:12px}.visual-section-title h2{margin:0}.visual-help{font-size:12px;color:#7e8688;line-height:1.5}.visual-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:760px){.visual-media{grid-template-columns:1fr}.visual-preview{height:200px}.visual-grid2{grid-template-columns:1fr}}
+.visual-preview{height:130px;background:#eef0f0;overflow:hidden;display:grid;place-items:center}.visual-preview img,.visual-preview video{width:100%;height:100%;object-fit:cover}.visual-empty{font-size:12px;color:#8a9293}.visual-fields label{margin-top:0}.visual-fields input{margin-bottom:8px}.visual-upload-row{display:flex;gap:8px;align-items:center}.visual-upload-row .visual-file{flex:1}.visual-file{padding:9px!important;background:#fff;border:1px solid var(--line)}.visual-cancel{display:none;white-space:nowrap}.visual-cancel.on{display:inline-flex}.visual-file-hint{font-size:11px;color:#7e8688;margin:-2px 0 10px}.visual-section-title{display:flex;align-items:center;gap:10px;margin-bottom:12px}.visual-section-title h2{margin:0}.visual-help{font-size:12px;color:#7e8688;line-height:1.5}.visual-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:760px){.visual-media{grid-template-columns:1fr}.visual-preview{height:200px}.visual-grid2{grid-template-columns:1fr}.visual-upload-row{align-items:stretch;flex-direction:column}}
 </style>
 <h1>Фото, видео и надписи</h1>
-<p class="visual-help">Теперь фото и видео можно загружать прямо с компьютера. Выбери файл в нужном кадре, при необходимости измени подпись и нажми кнопку сохранения блока.</p>
+<p class="visual-help">Фото и видео можно загрузить прямо с компьютера. После выбора увидишь превью. Если передумал — нажми «Отмена». Для применения файла нажми кнопку сохранения нужного блока.</p>
 <?php if ($msg): ?><div class="msg"><?= h($msg) ?></div><?php endif; ?>
 <datalist id="visual-media-list"><?php foreach($mediaList as $m): ?><option value="<?= h(media_url($m['file'])) ?>"><?= h($m['alt']) ?></option><?php endforeach; ?></datalist>
 <div class="panel"><form method="get" class="row"><div style="flex:1"><label>Страница</label><select name="page" onchange="this.form.submit()"><?php foreach($pages as $p): ?><option value="<?= (int)$p['id'] ?>" <?= $pageId==(int)$p['id']?'selected':'' ?>><?= h($p['title']) ?> (<?= h($p['slug']) ?>)</option><?php endforeach; ?></select></div></form></div>
@@ -146,4 +169,23 @@ head('Фото, видео и надписи'); ?>
 
 <div class="panel"><form method="post" enctype="multipart/form-data"><input type="hidden" name="a" value="save_brand"><input type="hidden" name="page_id" value="<?= $pageId ?>"><div class="visual-section-title"><h2>О бренде</h2><span class="tag">Большое фото / видео</span></div><div class="visual-grid2"><div><label>Метка</label><input name="label" value="<?= h($brand['label']) ?>"></div><div><label>Заголовок</label><input name="title" value="<?= h($brand['title']) ?>"></div></div><label>Текст — абзацы разделяй пустой строкой</label><textarea name="text" style="min-height:180px"><?= h($brand['text']) ?></textarea><label>Текст ссылки</label><input name="link_text" value="<?= h($brand['link_text']) ?>"><?php v_media_field('brand',0,$brand['media_src'],$brand['media_label'],'Большое фото / видео'); ?><button class="btn">Сохранить «О бренде»</button></form></div>
 <div class="panel"><div class="visual-section-title"><h2>Карточки товара</h2><span class="tag">Фото по цветам</span></div><p class="visual-help">Фотографии товара, цвета и порядок кадров редактируются в разделе «Товары».</p><a class="btn grey" href="products.php">Открыть товары</a></div>
+<script>
+document.addEventListener('change',function(e){
+  var input=e.target.closest('.visual-file'); if(!input)return;
+  var box=input.closest('.visual-media'), preview=box.querySelector('.visual-preview'), cancel=box.querySelector('.visual-cancel');
+  if(!input.files || !input.files[0]){cancel.classList.remove('on');return;}
+  var file=input.files[0], url=URL.createObjectURL(file), node;
+  preview.innerHTML='';
+  if(file.type.indexOf('video/')===0){node=document.createElement('video');node.controls=true;node.muted=true;}
+  else {node=document.createElement('img');}
+  node.src=url;preview.appendChild(node);cancel.classList.add('on');
+});
+document.addEventListener('click',function(e){
+  var btn=e.target.closest('.visual-cancel'); if(!btn)return;
+  var box=btn.closest('.visual-media'), input=box.querySelector('.visual-file'), preview=box.querySelector('.visual-preview'), original=box.getAttribute('data-original-src')||'';
+  input.value=''; btn.classList.remove('on'); preview.innerHTML='';
+  if(original){var isVideo=/\.(mp4|webm)(?:\?|$)/i.test(original), node=document.createElement(isVideo?'video':'img');node.src=original;if(isVideo){node.controls=true;node.muted=true;}preview.appendChild(node);}
+  else {preview.innerHTML='<div class="visual-empty">нет файла</div>';}
+});
+</script>
 <?php foot();
