@@ -169,3 +169,11 @@ footer a,footer button{font-size:13px;padding:4px 0}
   .mhead{padding:16px 20px}
   .mbody{padding:22px 20px}
 }
+
+/* Хэдер: логотип как в референсе — ближе к краю и крупнее */
+header .bar{max-width:none;padding-left:4px;padding-right:12px}
+header .logo img{height:32px;width:auto}
+@media(max-width:900px){
+  header .bar{padding-left:4px;padding-right:10px}
+  header .logo img{height:30px}
+}
