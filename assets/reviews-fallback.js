@@ -55,6 +55,21 @@
 
 (function(){
   'use strict';
+  function normalizeCatalog(nav){
+    if(!nav)return;
+    Array.prototype.slice.call(nav.querySelectorAll('a,button')).forEach(function(el){
+      if((el.textContent||'').trim().toLowerCase()==='главная'){
+        var link=el;
+        if(el.tagName!=='A'){
+          link=document.createElement('a');
+          el.parentNode.replaceChild(link,el);
+        }
+        link.removeAttribute('data-open');
+        link.textContent='Каталог';
+        link.href='#product';
+      }
+    });
+  }
   function addBrandLink(nav){
     if(!nav)return;
     Array.prototype.slice.call(nav.querySelectorAll('a,button')).forEach(function(el){
@@ -70,6 +85,8 @@
     if(contacts) nav.insertBefore(link,contacts);
     else nav.appendChild(link);
   }
+  normalizeCatalog(document.querySelector('header .menu'));
+  normalizeCatalog(document.getElementById('mobileMenu'));
   addBrandLink(document.querySelector('header .menu'));
   addBrandLink(document.getElementById('mobileMenu'));
 
