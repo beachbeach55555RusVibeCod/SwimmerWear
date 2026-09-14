@@ -149,3 +149,12 @@
   s.defer=true;
   document.body.appendChild(s);
 })();
+
+(function(){
+  'use strict';
+  if(document.querySelector('.build-showcase')) return;
+  var s=document.createElement('script');
+  s.src='/assets/build-fallback.js?v=4';
+  s.defer=true;
+  document.body.appendChild(s);
+})();
