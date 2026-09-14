@@ -230,6 +230,7 @@ if (!$blocks) echo '<section><div class="wrap"><h1>' . h($page['title']) . '</h1
 <script>window.SW = <?= json_encode($SW, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
 <script src="/assets/app.js"></script>
 <script src="/assets/product-color-scope-fix.js?v=1"></script>
+<script src="/assets/checkout-email.js?v=1"></script>
 <script src="/assets/tech-fallback.js"></script>
 <script src="/assets/build-fallback.js"></script>
 <script src="/assets/reviews-fallback.js?v=6"></script>
