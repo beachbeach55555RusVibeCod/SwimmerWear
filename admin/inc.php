@@ -21,6 +21,7 @@ function head($title) { ?>
   <div class="brand">SWIMMER<span>CMS</span></div>
   <nav>
     <a href="product-cards.php">Карточки товара</a>
+    <a href="stock.php">Склад</a>
     <a href="visuals.php">Редактор медиа</a>
     <a href="contacts.php">Редактор контактов</a>
   </nav>
