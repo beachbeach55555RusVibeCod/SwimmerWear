@@ -62,9 +62,29 @@
   }
   var hero=document.querySelector('.hero .hero-in');
   if(hero){
-    var t1=hero.querySelector('.hero-t1'); if(t1)t1.textContent='НАДЕЖНЫЕ ВЕЩИ ДЛЯ ОТДЫХА У ВОДЫ';
-    var h1=hero.querySelector('h1'); if(h1)h1.textContent='РЕЧНАЯ ПАРКА';
-    var t2=hero.querySelector('.hero-t2'); if(t2)t2.textContent='Тёплая мембранная парка-плед для дождя, ветра и холодной погоды';
+    var h1=hero.querySelector('h1');
+    var t1=hero.querySelector('.hero-t1');
+    if(!t1){
+      t1=document.createElement('div');
+      t1.className='hero-t1';
+      if(h1) hero.insertBefore(t1,h1); else hero.insertBefore(t1,hero.firstChild);
+    }
+    t1.textContent='НАДЕЖНЫЕ ВЕЩИ ДЛЯ ОТДЫХА У ВОДЫ';
+
+    if(!h1){
+      h1=document.createElement('h1');
+      hero.appendChild(h1);
+    }
+    h1.textContent='РЕЧНАЯ ПАРКА';
+
+    var t2=hero.querySelector('.hero-t2');
+    if(!t2){
+      t2=document.createElement('p');
+      t2.className='hero-t2';
+      if(h1.nextSibling) hero.insertBefore(t2,h1.nextSibling); else hero.appendChild(t2);
+    }
+    t2.textContent='Тёплая мембранная парка-плед для дождя, ветра и холодной погоды';
+
     var specs=hero.querySelector('.specs');
     if(!specs){specs=document.createElement('div');specs.className='specs';}
     specs.innerHTML=
@@ -78,7 +98,7 @@
     if(specs.parentNode!==hero)hero.insertBefore(specs,cta); else if(specs.nextElementSibling!==cta)hero.insertBefore(specs,cta);
   }
   var css=document.createElement('style');
-  css.textContent='.hero-veil{background:linear-gradient(90deg,rgba(10,13,14,.72) 0%,rgba(10,13,14,.52) 36%,rgba(10,13,14,.12) 72%),linear-gradient(180deg,rgba(10,13,14,.04),rgba(10,13,14,.38))}.hero-in{padding-top:108px;padding-bottom:46px;justify-content:flex-end;align-items:flex-start}.hero-t1{font-size:11px;line-height:1.25;letter-spacing:.14em;margin-bottom:12px;max-width:300px}.hero-in h1{font-size:clamp(48px,6.6vw,88px);line-height:.92;letter-spacing:-.05em;max-width:none;margin:0;text-transform:uppercase}.hero-t2{font-size:16px;line-height:1.42;max-width:520px;margin-top:14px}.hero .specs{display:grid;grid-template-columns:repeat(4,minmax(125px,1fr));gap:22px;max-width:780px;margin-top:30px;border-top:0;padding-top:0}.hero .spec{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding-right:0;min-height:0;border-right:0}.hero .spec svg{width:24px;height:24px;stroke:rgba(255,255,255,.95);stroke-width:1.35;fill:none;margin-top:1px}.hero .spec b{display:block;font-size:14px;line-height:1.2;letter-spacing:.01em}.hero .spec span{display:block;margin-top:5px;font-size:10px;line-height:1.35;max-width:150px;color:rgba(255,255,255,.72)}.hero-cta{margin-top:26px;min-width:150px;text-align:center;padding:13px 30px;font-size:11px;letter-spacing:.14em;background:#fff;color:#171B1C;border:1px solid #fff}.hero-cta:hover{background:transparent;color:#fff}@media(max-width:900px){.hero .specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px;max-width:560px}.hero-in h1{font-size:clamp(46px,13vw,76px)}.hero-t2{font-size:15px;max-width:480px}}@media(max-width:560px){.hero-in{padding-bottom:30px}.hero .specs{margin-top:24px}.hero .spec span{font-size:9px}.hero-cta{margin-top:22px}}';
+  css.textContent='.hero-veil{background:linear-gradient(90deg,rgba(10,13,14,.72) 0%,rgba(10,13,14,.52) 36%,rgba(10,13,14,.12) 72%),linear-gradient(180deg,rgba(10,13,14,.04),rgba(10,13,14,.38))}.hero-in{padding-top:108px;padding-bottom:46px;justify-content:flex-end;align-items:flex-start}.hero-t1{font-size:11px;line-height:1.25;letter-spacing:.14em;margin-bottom:12px;max-width:300px}.hero-in h1{font-size:clamp(44px,5.6vw,78px);line-height:.92;letter-spacing:-.05em;max-width:none;margin:0;text-transform:uppercase;white-space:nowrap}.hero-t2{font-size:16px;line-height:1.42;max-width:520px;margin-top:14px}.hero .specs{display:grid;grid-template-columns:repeat(4,minmax(125px,1fr));gap:22px;max-width:780px;margin-top:30px;border-top:0;padding-top:0}.hero .spec{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding-right:0;min-height:0;border-right:0}.hero .spec svg{width:24px;height:24px;stroke:rgba(255,255,255,.95);stroke-width:1.35;fill:none;margin-top:1px}.hero .spec b{display:block;font-size:14px;line-height:1.2;letter-spacing:.01em}.hero .spec span{display:block;margin-top:5px;font-size:10px;line-height:1.35;max-width:150px;color:rgba(255,255,255,.72)}.hero-cta{margin-top:26px;min-width:150px;text-align:center;padding:13px 30px;font-size:11px;letter-spacing:.14em;background:#fff;color:#171B1C;border:1px solid #fff}.hero-cta:hover{background:transparent;color:#fff}@media(max-width:900px){.hero .specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px;max-width:560px}.hero-in h1{font-size:clamp(34px,9.5vw,52px);white-space:nowrap}.hero-t1{font-size:10px;max-width:220px}.hero-t2{font-size:14px;max-width:360px}}@media(max-width:560px){.hero-in{padding-bottom:30px}.hero .specs{margin-top:24px}.hero .spec span{font-size:9px}.hero-cta{margin-top:22px}.hero-in h1{font-size:clamp(30px,9.3vw,42px)}}';
   document.head.appendChild(css);
 })();
 
