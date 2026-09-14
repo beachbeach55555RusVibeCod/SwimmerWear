@@ -14,8 +14,12 @@ function json_fail($message, $code=400) {
   exit;
 }
 
+function order_fail($pdo, $message, $code=400) {
+  if ($pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
+  json_fail($message, $code);
+}
+
 function send_order_email($orderId, $name, $phone, $email, $comment, $resolved, $total) {
-  // Все заказы всегда отправляем на рабочий e-mail сайта — тот же, что указан в контактах.
   $to = trim((string)setting('email', ''));
   if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
     error_log('Order #' . $orderId . ': work email is not configured');
@@ -63,9 +67,7 @@ function send_order_email($orderId, $name, $phone, $email, $comment, $resolved, 
 }
 
 function notify_order_channels($orderId, $name, $phone, $email, $comment, $resolved, $total) {
-  $emailSent = send_order_email($orderId, $name, $phone, $email, $comment, $resolved, $total);
-  // Здесь позже подключим Telegram-бота вторым каналом уведомлений.
-  return ['email_sent'=>$emailSent];
+  return ['email_sent'=>send_order_email($orderId, $name, $phone, $email, $comment, $resolved, $total)];
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
@@ -86,7 +88,10 @@ if (count($items) > 30) json_fail('Слишком много позиций.');
 
 try {
   $pdo = db();
-  $pdo->beginTransaction();
+
+  // DDL нельзя выполнять внутри транзакции MySQL: CREATE TABLE делает неявный COMMIT.
+  // Раньше из-за этого заказ мог записаться, а затем commit() выдавал ошибку,
+  // и покупатель видел «Не удалось оформить заказ».
   $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     status VARCHAR(32) NOT NULL DEFAULT 'new',
@@ -112,6 +117,8 @@ try {
     INDEX(order_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+  $pdo->beginTransaction();
+
   $resolved = [];
   $total = 0;
   foreach ($items as $item) {
@@ -120,7 +127,9 @@ try {
     $color = trim((string)($item['color'] ?? ''));
     $size = trim((string)($item['size'] ?? ''));
     $qty = (int)($item['qty'] ?? 0);
-    if (($productId < 1 && $sku === '') || $color === '' || $size === '' || $qty < 1 || $qty > 20) json_fail('Проверьте состав заказа.');
+    if (($productId < 1 && $sku === '') || $color === '' || $size === '' || $qty < 1 || $qty > 20) {
+      order_fail($pdo, 'Проверьте состав заказа.');
+    }
 
     if ($productId > 0) {
       $st = $pdo->prepare("SELECT p.id,p.sku,p.name,p.price,v.id AS variant_id,v.stock
@@ -132,7 +141,6 @@ try {
                            LIMIT 1 FOR UPDATE");
       $st->execute([$productId,$color,$size]);
     } else {
-      // Совместимость со старыми корзинами без product_id.
       $st = $pdo->prepare("SELECT p.id,p.sku,p.name,p.price,v.id AS variant_id,v.stock
                            FROM products p
                            JOIN variants v ON v.product_id=p.id
@@ -145,8 +153,10 @@ try {
     }
 
     $v = $st->fetch();
-    if (!$v) json_fail('Один из выбранных вариантов товара больше недоступен.');
-    if ((int)$v['stock'] < $qty) json_fail('Недостаточно товара на складе: ' . $v['name'] . ', ' . $color . ', ' . $size . '. Доступно: ' . (int)$v['stock'] . ' шт.');
+    if (!$v) order_fail($pdo, 'Один из выбранных вариантов товара больше недоступен.');
+    if ((int)$v['stock'] < $qty) {
+      order_fail($pdo, 'Недостаточно товара на складе: ' . $v['name'] . ', ' . $color . ', ' . $size . '. Доступно: ' . (int)$v['stock'] . ' шт.');
+    }
 
     $resolved[] = [$v,$color,$size,$qty];
     $total += (int)$v['price'] * $qty;
@@ -161,14 +171,15 @@ try {
   foreach ($resolved as [$v,$color,$size,$qty]) {
     $ins->execute([$orderId,(int)$v['id'],$v['sku'],$v['name'],$color,$size,(int)$v['price'],$qty]);
     $dec->execute([$qty,(int)$v['variant_id'],$qty]);
-    if ($dec->rowCount() !== 1) json_fail('Остаток изменился. Повторите заказ.');
+    if ($dec->rowCount() !== 1) order_fail($pdo, 'Остаток изменился. Повторите заказ.');
   }
+
   $pdo->commit();
 
   $notification = notify_order_channels($orderId, $name, $phone, $email, $comment, $resolved, $total);
   echo json_encode(['ok'=>true,'order_id'=>$orderId,'total'=>$total] + $notification, JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
-  if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
-  error_log($e->getMessage());
+  if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
+  error_log('ORDER ERROR: ' . $e->getMessage());
   json_fail('Не удалось оформить заказ. Попробуйте ещё раз.', 500);
 }
