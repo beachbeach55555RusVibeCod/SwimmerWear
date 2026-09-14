@@ -9,7 +9,9 @@ function head($title) { ?>
 <div class="layout">
 <aside>
   <div class="brand">SWIMMER<span>CMS</span></div>
-  <nav></nav>
+  <nav>
+    <a href="product-cards.php">Карточки товара</a>
+  </nav>
   <a class="out" href="logout.php">Выйти</a>
 </aside>
 <main>
