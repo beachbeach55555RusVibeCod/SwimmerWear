@@ -15,30 +15,55 @@
     return /^https?:\/\//i.test(value)?value:'';
   }
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function ensureSocialSlot(footer){
+    var slot=footer.querySelector('.footer-socials-slot');
+    if(slot)return slot;
+    slot=document.createElement('div');
+    slot.className='footer-socials-slot';
+    var spec=footer.querySelector('.footer-spec');
+    if(spec){
+      var links=spec.querySelector('.footer-spec__links');
+      if(links)spec.insertBefore(slot,links);else spec.appendChild(slot);
+      return slot;
+    }
+    var grid=footer.querySelector('.fgrid');
+    if(grid){
+      var legal=grid.querySelector('.footer-legal');
+      if(legal)grid.insertBefore(slot,legal);else grid.appendChild(slot);
+      return slot;
+    }
+    footer.appendChild(slot);
+    return slot;
+  }
   function render(data){
     var footer=document.querySelector('footer'); if(!footer)return;
     var target=footer.querySelector('.footer-spec__contacts')||footer.querySelector('.brand-page-footer-contacts');
     if(!target){target=document.createElement('div');target.className='footer-runtime-contacts';var wrap=footer.querySelector('.wrap');if(wrap)wrap.appendChild(target);else footer.appendChild(target);}
     target.classList.add('footer-runtime-contacts');
+    var socialSlot=ensureSocialSlot(footer);
     var phone=(data.phone||'').trim(), email=(data.email||'').trim(), address=(data.address||'').trim();
     var html='<div class="footer-runtime-contacts__data">';
-    if(address)html+='<span>'+esc(address)+'</span>';
-    if(phone)html+='<a href="tel:'+esc(phone.replace(/[^+\d]/g,''))+'">'+esc(phone)+'</a>';
-    if(email)html+='<a href="mailto:'+esc(email)+'">'+esc(email)+'</a>';
-    html+='</div><div class="footer-socials" aria-label="Социальные сети">';
+    if(address)html+='<div><b>АДРЕС</b><span>'+esc(address)+'</span></div>';
+    if(phone)html+='<div><b>ТЕЛЕФОН</b><a href="tel:'+esc(phone.replace(/[^+\d]/g,''))+'">'+esc(phone)+'</a></div>';
+    if(email)html+='<div><b>E-MAIL</b><a href="mailto:'+esc(email)+'">'+esc(email)+'</a></div>';
+    html+='</div>';
+    target.innerHTML=html;
+
+    var socialHtml='<div class="footer-socials" aria-label="Социальные сети">';
     Object.keys(NAMES).forEach(function(key){
       var url=safeUrl(data.socials&&data.socials[key]);
       if(!url)return;
-      html+='<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+NAMES[key]+'" title="'+NAMES[key]+'">'+ICONS[key]+'</a>';
+      socialHtml+='<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+NAMES[key]+'" title="'+NAMES[key]+'">'+ICONS[key]+'</a>';
     });
-    html+='</div>';
-    target.innerHTML=html;
+    socialHtml+='</div>';
+    socialSlot.innerHTML=socialHtml;
+    socialSlot.style.display=socialSlot.querySelector('a')?'flex':'none';
   }
 
   if(!document.getElementById('footer-socials-style')){
     var style=document.createElement('style');
     style.id='footer-socials-style';
-    style.textContent='.footer-runtime-contacts{display:flex;flex-direction:column;gap:14px;align-items:flex-start;min-width:210px}.footer-runtime-contacts__data{display:flex;flex-direction:column;gap:7px;font-size:12px;line-height:1.45;color:#cfd4d4}.footer-runtime-contacts__data a{color:inherit;text-decoration:none}.footer-runtime-contacts__data a:hover{text-decoration:underline}.footer-socials{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.footer-socials a{width:34px;height:34px;border:1px solid rgba(255,255,255,.28);display:grid;place-items:center;color:#fff;text-decoration:none;transition:.18s ease}.footer-socials a:hover{background:#fff;color:#191d1e;border-color:#fff}.footer-socials svg{width:18px;height:18px;fill:currentColor;stroke:currentColor;stroke-width:1.7}.footer-socials svg rect,.footer-socials svg circle{fill:none}.footer-socials .fill-dot,.footer-socials .play,.footer-socials .phone{fill:currentColor;stroke:none}@media(max-width:700px){.footer-runtime-contacts{min-width:0}}';
+    style.textContent='.footer-spec{grid-template-columns:minmax(230px,1fr) minmax(260px,420px) auto minmax(210px,auto)!important;gap:44px!important;align-items:center!important}.footer-socials-slot{display:flex;justify-content:center;align-items:center;min-height:70px;align-self:center}.footer-runtime-contacts{display:flex;flex-direction:column;gap:14px;align-items:flex-start;min-width:210px}.footer-runtime-contacts__data{display:flex;flex-direction:column;gap:10px;font-size:12px;line-height:1.45;color:#cfd4d4}.footer-runtime-contacts__data>div{display:flex;flex-direction:column;gap:3px}.footer-runtime-contacts__data b{font-size:10px;letter-spacing:.08em;color:#7E8688}.footer-runtime-contacts__data a{color:inherit;text-decoration:none}.footer-runtime-contacts__data a:hover{text-decoration:underline}.footer-socials{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}.footer-socials a{width:42px;height:42px;border:1px solid rgba(255,255,255,.28);display:grid;place-items:center;color:#fff;text-decoration:none;transition:.18s ease;border-radius:50%}.footer-socials a:hover{background:#fff;color:#191d1e;border-color:#fff;transform:translateY(-1px)}.footer-socials svg{width:20px;height:20px;fill:currentColor;stroke:currentColor;stroke-width:1.7}.footer-socials svg rect,.footer-socials svg circle{fill:none}.footer-socials .fill-dot,.footer-socials .play,.footer-socials .phone{fill:currentColor;stroke:none}#brand-contacts .fgrid{grid-template-columns:minmax(230px,1fr) minmax(260px,420px) auto minmax(210px,auto)!important;gap:44px!important;align-items:center!important}@media(max-width:1000px){.footer-spec,#brand-contacts .fgrid{grid-template-columns:1fr 1fr!important}.footer-socials-slot{justify-content:flex-start}.footer-socials{justify-content:flex-start}}@media(max-width:700px){.footer-spec,#brand-contacts .fgrid{grid-template-columns:1fr!important;gap:28px!important}.footer-runtime-contacts{min-width:0}.footer-socials-slot{min-height:0;justify-content:flex-start}.footer-socials{justify-content:flex-start}}';
     document.head.appendChild(style);
   }
 
